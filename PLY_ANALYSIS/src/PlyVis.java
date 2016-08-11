@@ -90,25 +90,25 @@ public class PlyVis {
 		root.getChildren().add(1, mv);
 		
 		// Creating Ambient Light
-		AmbientLight ambient = new AmbientLight();
-		ambient.setColor(Color.rgb(200, 200, 200, 0.9));
-		{
-			// Creating Point Light
-			PointLight point = new PointLight();
-			point.setColor(Color.ANTIQUEWHITE);
-			point.setLayoutX(width + 700);
-			point.setLayoutY(height / 2);
-			point.setTranslateZ(-10000);
-			point.getScope().add(mv);
-			
-			root.getChildren().addAll(point, ambient); // point
-		}
+//		AmbientLight ambient = new AmbientLight();
+//		ambient.setColor(Color.rgb(200, 200, 200, 0.9));
+//		{
+//			// Creating Point Light
+//			PointLight point = new PointLight();
+//			point.setColor(Color.ANTIQUEWHITE);
+//			point.setLayoutX(width + 700);
+//			point.setLayoutY(height / 2);
+//			point.setTranslateZ(-10000);
+//			point.getScope().add(mv);
+//			
+//			root.getChildren().addAll(point, ambient); // point
+//		}
 		
 		// Adding to scene
 		
-		ArrayList<Stop> stops = new ArrayList<Stop>();
-		stops.add(new Stop(0, Color.DARKBLUE));
-		stops.add(new Stop(500, Color.DARKGRAY));
+//		ArrayList<Stop> stops = new ArrayList<Stop>();
+//		stops.add(new Stop(0, Color.DARKBLUE));
+//		stops.add(new Stop(500, Color.DARKGRAY));
 		
 		
 		// Creating Perspective View Camera
@@ -127,12 +127,13 @@ public class PlyVis {
 		Object returnscene;
 		if (suborly) {
 			SubScene scene = new SubScene(root, 1024, 768, true, SceneAntialiasing.BALANCED);
-			scene.setFill(new LinearGradient(0, 0, 0, 1, true, CycleMethod.NO_CYCLE, stops));
+//			scene.setFill(new LinearGradient(0, 0, 0, 1, true, CycleMethod.NO_CYCLE, stops));
+		    scene.setFill(Color.AQUAMARINE);
 			scene.setCamera(cam);
 			returnscene = scene;
 		} else {
 			Scene scene = new Scene(root, 1024, 768, true, SceneAntialiasing.BALANCED);
-			scene.setFill(new LinearGradient(0, 0, 0, 1, true, CycleMethod.NO_CYCLE, stops));
+//			scene.setFill(new LinearGradient(0, 0, 0, 1, true, CycleMethod.NO_CYCLE, stops));
 			scene.setCamera(cam);
 			returnscene = scene;
 		}
@@ -177,4 +178,66 @@ public class PlyVis {
         
         return axisGroup;
     }
+
+	public SubScene createTest() {
+	   	// 3D
+//	    Box box = new Box(5, 5, 5);
+//	    box.setMaterial(new PhongMaterial(Color.GREENYELLOW));
+		
+TetrahedronMesh tm = new TetrahedronMesh(25.0, points);
+		
+		MeshView mv = new MeshView(tm);
+		mv.setDrawMode(DrawMode.FILL);
+		
+		PhongMaterial pmaterial = new PhongMaterial();
+		Color col = new Color(0.7, 1.0, 0.7, 1.0);
+		pmaterial.setDiffuseColor(col);
+		pmaterial.setSpecularColor(col);
+		pmaterial.setSpecularPower(39.0);
+		mv.setMaterial(pmaterial);
+		
+		mv.setCullFace(CullFace.NONE);
+		
+		Bounds bounds = mv.getBoundsInParent();
+		
+		System.out.println(bounds.toString());
+
+		mv.setScaleX(0.5);
+		mv.setScaleY(0.5);
+		mv.setScaleZ(0.5);
+		
+		double a = 6.0 - 2500.0 / 2 + 750;
+		double b = -90.0 - Math.abs(bounds.getMaxY()) / 2 -500; // green
+		double c = -209.0 + Math.abs(bounds.getMinZ()) - 2000; // blue
+		mv.setTranslateX(a);
+		mv.setTranslateY(b);
+		mv.setTranslateZ(c);
+
+//		root.getChildren().add(0, buildAxes());
+//		root.getChildren().add(1, mv);
+
+	    PerspectiveCamera camera = new PerspectiveCamera(true);
+	    camera.getTransforms().addAll (main.rotateX, main.rotateY, new Translate(0, 0, -20));
+	    
+//	    Rotate rz = new Rotate(45.0, Rotate.X_AXIS);
+//		int camZdist = -20000;
+//		Translate tz = new Translate(0.0, 0.0, camZdist );
+//		camera.getTransforms().add(rz);
+//		camera.getTransforms().add(tz);
+	    
+	    PerspectiveCamera cam = new PerspectiveCamera(true);
+		cam.setFarClip(Integer.MAX_VALUE);
+		Rotate rz = new Rotate(45.0, Rotate.X_AXIS);
+		int camZdist = -20000;
+		Translate tz = new Translate(0.0, 0.0, camZdist );
+		cam.getTransforms().add(rz);
+		cam.getTransforms().add(tz);
+
+	    Group root3D = new Group(cam,mv);
+
+	    SubScene subScene = new SubScene(root3D, 2000, 3000, true, SceneAntialiasing.BALANCED);
+	    subScene.setFill(Color.AQUAMARINE);
+	    subScene.setCamera(cam);
+		return subScene;
+	}
 }

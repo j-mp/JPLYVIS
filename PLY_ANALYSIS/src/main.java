@@ -154,8 +154,8 @@ public class main extends Application{
 	
 	private double mousePosX, mousePosY;
 	private double mouseOldX, mouseOldY;
-	private final Rotate rotateX = new Rotate(-20, Rotate.X_AXIS);
-	private final Rotate rotateY = new Rotate(-20, Rotate.Y_AXIS);
+	final static Rotate rotateX = new Rotate(-20, Rotate.X_AXIS);
+	final static Rotate rotateY = new Rotate(-20, Rotate.Y_AXIS);
 	
 	@Override
 	public void start(Stage primaryStage) throws Exception {
@@ -183,24 +183,13 @@ public class main extends Application{
 //		   bp.setBottom(visGroup);
 //		   primaryStage.setScene(vis.createScene());
 		   
-		   	// 3D
-//		    Box box = new Box(5, 5, 5);
-//		    box.setMaterial(new PhongMaterial(Color.GREENYELLOW));
-//
-//		    PerspectiveCamera camera = new PerspectiveCamera(true);
-//		    camera.getTransforms().addAll (rotateX, rotateY, new Translate(0, 0, -20));
-//
-//		    Group root3D = new Group(camera,box);
-//
-//		    SubScene subScene = new SubScene(root3D, 300, 300, true, SceneAntialiasing.BALANCED);
-//		    subScene.setFill(Color.AQUAMARINE);
-//		    subScene.setCamera(camera);
 
-		   SubScene subScene = vis.createSubScene();
+
+//		   SubScene subScene = vis.createSubScene();
 		   
 		    // 2D
 		    BorderPane pane = new BorderPane();
-		    pane.setCenter(subScene);
+		    pane.setCenter(visGroup);
 		    Button button = new Button("Reset");
 		    button.setOnAction(e->{
 		        rotateX.setAngle(-20);
