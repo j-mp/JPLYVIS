@@ -6,6 +6,7 @@ import java.util.List;
 import javax.vecmath.Point3d;
 
 import org.apache.poi.hssf.util.PaneInformation;
+import org.w3c.tools.widgets.BorderPanel;
 
 import javafx.application.Application;
 import javafx.scene.Node;
@@ -55,6 +56,22 @@ import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 import javafx.stage.FileChooser;
 import javafx.scene.control.TextField;
+import javafx.event.EventHandler;
+import javafx.scene.Group;
+import javafx.scene.PerspectiveCamera;
+import javafx.scene.Scene;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.input.ScrollEvent;
+import javafx.scene.transform.Rotate;
+import javafx.scene.transform.Translate;
+import javafx.scene.SubScene;
+import javafx.scene.paint.PhongMaterial;
+import javafx.scene.paint.Stop;
+import javafx.scene.shape.Box;
+import javafx.scene.shape.DrawMode;
+import javafx.geometry.Orientation;
 
 public class main extends Application{
 	
@@ -133,6 +150,12 @@ public class main extends Application{
 	private SubScene visGroup;
 	Group g;
 	Stage primaryStage;
+	BorderPane bp;
+	
+	private double mousePosX, mousePosY;
+	private double mouseOldX, mouseOldY;
+	private final Rotate rotateX = new Rotate(-20, Rotate.X_AXIS);
+	private final Rotate rotateY = new Rotate(-20, Rotate.Y_AXIS);
 	
 	@Override
 	public void start(Stage primaryStage) throws Exception {
@@ -141,56 +164,93 @@ public class main extends Application{
 //		loader.setLocation(main.class.getResource("PlyVisGui.fxml"));
 //		rootlayout = loader.load();
 		
-		primaryStage.setScene(createGuiScene(visGroup, primaryStage));
+//		ArrayList<Point3d> pointlist = loadData("/home/pape/Schreibtisch/test.ply");
+//		PlyVis vis = new PlyVis(pointlist);
+//		
+//		visGroup = vis.createSubScene();
+//		
+//		primaryStage.setScene(vis.createScene());
+		
+//		primaryStage.setScene(createGuiScene(primaryStage));
+		
+		ArrayList<Point3d> pointlist = loadData("/home/pape/Schreibtisch/test.ply");
+		   PlyVis vis = new PlyVis(pointlist);
+		   System.out.println("Fin loading.");
+		   visGroup = vis.createSubScene();
+//		   VBox vbox = new VBox();
+//		   vbox.getChildren().add(visGroup);
+
+//		   bp.setBottom(visGroup);
+//		   primaryStage.setScene(vis.createScene());
+		   
+		   	// 3D
+//		    Box box = new Box(5, 5, 5);
+//		    box.setMaterial(new PhongMaterial(Color.GREENYELLOW));
+//
+//		    PerspectiveCamera camera = new PerspectiveCamera(true);
+//		    camera.getTransforms().addAll (rotateX, rotateY, new Translate(0, 0, -20));
+//
+//		    Group root3D = new Group(camera,box);
+//
+//		    SubScene subScene = new SubScene(root3D, 300, 300, true, SceneAntialiasing.BALANCED);
+//		    subScene.setFill(Color.AQUAMARINE);
+//		    subScene.setCamera(camera);
+
+		   SubScene subScene = vis.createSubScene();
+		   
+		    // 2D
+		    BorderPane pane = new BorderPane();
+		    pane.setCenter(subScene);
+		    Button button = new Button("Reset");
+		    button.setOnAction(e->{
+		        rotateX.setAngle(-20);
+		        rotateY.setAngle(-20);
+		    });
+//		    CheckBox checkBox = new CheckBox("Line");
+//		    checkBox.setOnAction(e->{
+//		        box.setDrawMode(checkBox.isSelected()?DrawMode.LINE:DrawMode.FILL);
+//		    });
+		    ToolBar toolBar = new ToolBar(button);
+		    toolBar.setOrientation(Orientation.VERTICAL);
+		    pane.setRight(toolBar);
+		    pane.setPrefSize(300,300);
+
+		    Scene scene = new Scene(pane);
+
+		    scene.setOnMousePressed((MouseEvent me) -> {
+		        mouseOldX = me.getSceneX();
+		        mouseOldY = me.getSceneY();
+		    });
+		    scene.setOnMouseDragged((MouseEvent me) -> {
+		        mousePosX = me.getSceneX();
+		        mousePosY = me.getSceneY();
+		        rotateX.setAngle(rotateX.getAngle()-(mousePosY - mouseOldY));
+		        rotateY.setAngle(rotateY.getAngle()+(mousePosX - mouseOldX));
+		        mouseOldX = mousePosX;
+		        mouseOldY = mousePosY;
+		    });
+		   
+		    primaryStage.setScene(scene);
 		primaryStage.setTitle("PLY VIS");
 		primaryStage.show();
 	}
 
-	private Scene createGuiScene(SubScene visGroup, Stage stage) {
+	private Scene createGuiScene(Stage stage) {
 		HBox hbox = new HBox(4.0);
 		Node m = createMenu(stage);
-		hbox.getChildren().addAll(m);
-		HBox.setHgrow(m, Priority.ALWAYS);
+//		hbox.getChildren().addAll(m);
+//		HBox.setHgrow(m, Priority.ALWAYS);
 		
-//		vbox = new VBox();
-		
-//		vbox.getChildren().add(visGroup);
-//		VBox.setVgrow(visGroup, Priority.ALWAYS);
+		bp = new BorderPane();
+		bp.setTop(hbox);
+		bp.setMinWidth(1024);
 		
 		g = new Group();
-		g.getChildren().addAll(hbox);
-		Scene s = new Scene(g, 1024, 768, true, SceneAntialiasing.DISABLED);
+		g.getChildren().addAll(bp);
+		Scene s = new Scene(g, 1024, 768);
 
 		return s;
 	}
-	
-//    public void start(Stage primaryStage) {
-//        this.primaryStage = primaryStage;
-//        this.primaryStage.setTitle("AddressApp");
-//
-//        initRootLayout();
-//
-//        showPersonOverview();
-//    }
-//
-//    /**
-//     * Initializes the root layout.
-//     */
-//    public void initRootLayout() {
-//        try {
-//            // Load root layout from fxml file.
-//            FXMLLoader loader = new FXMLLoader();
-//            loader.setLocation(MainApp.class.getResource("view/RootLayout.fxml"));
-//            rootLayout = (BorderPane) loader.load();
-//
-//            // Show the scene containing the root layout.
-//            Scene scene = new Scene(rootLayout);
-//            primaryStage.setScene(scene);
-//            primaryStage.show();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//    }
 
 	private Node createMenu(Stage stage) {
 		MenuBar menuBar = new MenuBar();
@@ -199,7 +259,7 @@ public class main extends Application{
        Menu menuFile = new Menu("File");
        
        MenuItem add = new MenuItem("Import ..."
-//    		   , new ImageView(new Image("menusample/new.png"))
+    		   //, new ImageView(new Image("menusample/new.png"))
                );
        add.setOnAction(new EventHandler<ActionEvent>() {
            public void handle(ActionEvent t) {
@@ -212,10 +272,10 @@ public class main extends Application{
         			   pointlist = loadData(file.getAbsolutePath());
         			   vis = new PlyVis(pointlist);
         			   System.out.println("Fin loading.");
-        			   visGroup = vis.createScene();
+        			   visGroup = vis.createSubScene();
         			   VBox vbox = new VBox();
         			   vbox.getChildren().add(visGroup);
-        			   g.getChildren().add(vbox);
+        			   bp.setBottom(vbox);
         			   stage.setTitle("PLY Vis | " + file.getAbsolutePath());
         		   } catch (IOException e) {
         			   // TODO Auto-generated catch block

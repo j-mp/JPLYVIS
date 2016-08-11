@@ -50,7 +50,7 @@ public class PlyVis {
 	
 	double anchorX, anchorY, anchorAngle;
 	
-	public SubScene createScene() {
+	public Object create(boolean suborly) {
 		// Container
 		Group root = new Group();
 		root.setTranslateZ(width / 2);
@@ -105,11 +105,11 @@ public class PlyVis {
 		}
 		
 		// Adding to scene
-		SubScene scene = new SubScene(root, 1024, 768, true, SceneAntialiasing.DISABLED);
+		
 		ArrayList<Stop> stops = new ArrayList<Stop>();
 		stops.add(new Stop(0, Color.DARKBLUE));
 		stops.add(new Stop(500, Color.DARKGRAY));
-		scene.setFill(new LinearGradient(0, 0, 0, 1, true, CycleMethod.NO_CYCLE, stops));
+		
 		
 		// Creating Perspective View Camera
 		PerspectiveCamera cam = new PerspectiveCamera(true);
@@ -119,14 +119,35 @@ public class PlyVis {
 		Translate tz = new Translate(0.0, 0.0, camZdist );
 		cam.getTransforms().add(rz);
 		cam.getTransforms().add(tz);
-		scene.setCamera(cam);
 		
-		FxCameraAnnimation camAni = new FxCameraAnnimation(cam);
-		camAni.startAnimation();
 		
-		new FxCameraInteractionPlyVis(scene, root, cam, camAni, camZdist, 100);
+//		FxCameraAnnimation camAni = new FxCameraAnnimation(cam);
+//		camAni.startAnimation();
 		
-		return scene;
+		Object returnscene;
+		if (suborly) {
+			SubScene scene = new SubScene(root, 1024, 768, true, SceneAntialiasing.BALANCED);
+			scene.setFill(new LinearGradient(0, 0, 0, 1, true, CycleMethod.NO_CYCLE, stops));
+			scene.setCamera(cam);
+			returnscene = scene;
+		} else {
+			Scene scene = new Scene(root, 1024, 768, true, SceneAntialiasing.BALANCED);
+			scene.setFill(new LinearGradient(0, 0, 0, 1, true, CycleMethod.NO_CYCLE, stops));
+			scene.setCamera(cam);
+			returnscene = scene;
+		}
+		
+//		new FxCameraInteractionPlyVis(returnscene, root, cam, camAni, camZdist, 100);
+		
+		return returnscene;
+	}
+	
+	public Scene createScene() {
+		return (Scene) create(false);
+	}
+	
+	public SubScene createSubScene() {
+		return (SubScene) create(true);
 	}
 	
 	private Group buildAxes() {
