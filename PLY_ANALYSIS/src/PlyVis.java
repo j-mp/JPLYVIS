@@ -105,7 +105,7 @@ public class PlyVis {
 		}
 		
 		// Adding to scene
-		SubScene scene = new SubScene(root, 2600, 2600, true, SceneAntialiasing.DISABLED);
+		SubScene scene = new SubScene(root, 1024, 768, true, SceneAntialiasing.DISABLED);
 		ArrayList<Stop> stops = new ArrayList<Stop>();
 		stops.add(new Stop(0, Color.DARKBLUE));
 		stops.add(new Stop(500, Color.DARKGRAY));
