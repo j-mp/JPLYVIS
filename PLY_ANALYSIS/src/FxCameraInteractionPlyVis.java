@@ -128,11 +128,11 @@ public class FxCameraInteractionPlyVis {
 				
 				if (ke.getCode() == KeyCode.G) {
 					if (showAxis) {
-//						System.out.println("Pressed G - > dis");
+						System.out.println("Pressed G - > dis");
 						group.getChildren().get(0).setVisible(false);
 						showAxis = false;
 					} else {
-//						System.out.println("Pressed G - > en");
+						System.out.println("Pressed G - > en");
 						group.getChildren().get(0).setVisible(true);
 						showAxis = true;
 					}

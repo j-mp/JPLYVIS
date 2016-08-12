@@ -5,10 +5,10 @@ import javax.vecmath.Point3d;
 import javafx.scene.shape.TriangleMesh;
 
 public class TetrahedronMesh extends TriangleMesh {
-    private ArrayList<Point3d> vertices;
+    private ArrayList<Point4f> vertices;
     private int[] facesLink;
 
-    public TetrahedronMesh(double length, ArrayList<Point3d> v) {
+    public TetrahedronMesh(double length, ArrayList<Point4f> v) {
         this.vertices = v;
         if (length > 0.0) {
             float[] points = new float[vertices.size() * 12];
@@ -20,7 +20,7 @@ public class TetrahedronMesh extends TriangleMesh {
             int pointCounter = 0;
             int facesCounter = 0;
             int texCounter = 0;
-            for (Point3d vertex : vertices) {
+            for (Point4f vertex : vertices) {
             	
                 vertex.scale(100);
                 points[primitiveCounter] = (float) vertex.x;
@@ -92,7 +92,7 @@ public class TetrahedronMesh extends TriangleMesh {
         }
     }
 
-    public Point3d getPointFromFace(int faceId) {
+    public Point4f getPointFromFace(int faceId) {
         return vertices.get(facesLink[faceId]);
     }
 }

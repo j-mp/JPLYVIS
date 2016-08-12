@@ -1,5 +1,5 @@
 
-public class Point3f {
+public class Point4f {
 
 	public float getX() {
 		return x;
@@ -17,15 +17,15 @@ public class Point3f {
 		return intensity;
 	}
 
-	private float x;
-	private float y;
-	private float z;
+	float x;
+	float y;
+	float z;
 	private float z_norm;
 	private float y_norm;
 	private float x_norm;
-	private float intensity;
+	float intensity;
 
-	public Point3f(float x, float y, float z, float normal_x, float normal_y, float normal_z) {
+	public Point4f(float x, float y, float z, float normal_x, float normal_y, float normal_z) {
 		this.x = x;
 		this.y = y;
 		this.z = z;
@@ -34,11 +34,16 @@ public class Point3f {
 		z_norm = normal_z;
 	}
 
-	public Point3f(float x, float y, float z, float intensity) {
+	public Point4f(float x, float y, float z, float intensity) {
 		this.x = x;
 		this.y = y;
 		this.z = z;
 		this.intensity = intensity;
 	}
 
+	public void scale(int s) {
+		this.x = this.x * s;
+		this.y = this.y * s;
+		this.z = this.z * s;
+	}
 }
