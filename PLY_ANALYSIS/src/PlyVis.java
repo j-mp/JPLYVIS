@@ -45,28 +45,25 @@ public class PlyVis {
 	public Object create(boolean suborly, PLYVisMode mode) {
 		// Container
 		Group root = new Group();
-		root.setTranslateZ(width / 2);
 		root.setRotationAxis(Rotate.Y_AXIS);
 		
 		// Creating Mesh
-		Node n;
+		Node n = new Group();
 		
-//		switch (mode) {
-//			case MESH_LINES:
-//				n = createMeshView(true);
-//				break;
-//			case MESH_FULL:
-//				n = createMeshView(false);
-//				break;
-//			case PRIMITIVES:
-//				n = cratePrimitives();
-//				break;
-//		}
+		switch (mode) {
+			case MESH_LINES:
+				n = createMeshView(true);
+				break;
+			case MESH_FULL:
+				n = createMeshView(false);
+				break;
+			case PRIMITIVES:
+				n = cratePrimitives();
+				break;
+		}
 		
-		n = new Group();
-		
-		root.getChildren().add(0, buildAxes());
-		//root.getChildren().add(1, n);
+		root.getChildren().add(0, movetoOrgin(buildAxes()));
+		root.getChildren().add(1, movetoOrgin(n));
 		
 		// Creating Ambient Light
 		AmbientLight ambient = new AmbientLight();
@@ -80,7 +77,7 @@ public class PlyVis {
 			point.setTranslateZ(-10000);
 			point.getScope().add(n);
 			
-			root.getChildren().addAll(point, ambient); // point
+			root.getChildren().addAll(ambient); // point
 		}
 		
 		// Adding to scene
@@ -91,14 +88,28 @@ public class PlyVis {
 		
 		
 		// Creating Perspective View Camera
-		PerspectiveCamera cam = new PerspectiveCamera(false);
+		PerspectiveCamera cam = new PerspectiveCamera(true);
 		cam.setFarClip(Integer.MAX_VALUE);
-		Rotate rz = new Rotate(45.0, Rotate.X_AXIS);
-		int camZdist = -20000;
+		Rotate rx = new Rotate(45.0, Rotate.X_AXIS);
+		Rotate ry = new Rotate(45.0, Rotate.Y_AXIS);
+		Rotate rz = new Rotate(45.0, Rotate.Z_AXIS);
+		int camZdist = -15000;
 		Translate tz = new Translate(0.0, 0.0, camZdist);
-		cam.getTransforms().add(rz);
-		cam.getTransforms().add(tz);
+		cam.getTransforms().addAll(rx, ry, rz, tz);
 		
+//		Bounds camboundsInScene = cam.localToScene(cam.getBoundsInLocal());
+//		
+//		Bounds cambs = cam.localToScreen(cam.getBoundsInLocal());
+//		
+//		Node aa = root.getChildren().get(0);
+//		Bounds aaboundsInScene = aa.localToScene(aa.getBoundsInLocal());
+//		System.out.println(aaboundsInScene);
+//		aa.getTransforms().add(new Translate(0.0, 0.0, -512.0));
+//		Bounds aaboundsInSceneaft = aa.localToScene(aa.getBoundsInLocal());
+//		
+//		System.out.println(camboundsInScene);
+//		System.out.println("Before: " + aaboundsInScene);
+//		System.out.println("After: " + aaboundsInSceneaft);
 		
 		FxCameraAnnimation camAni = new FxCameraAnnimation(cam);
 //		camAni.startAnimation();
@@ -121,6 +132,40 @@ public class PlyVis {
 		new FxCameraInteractionPlyVis((SubScene)returnscene, root, cam, camAni, camZdist, 100);
 		
 		return returnscene;
+	}
+
+	private Node movetoOrgin(Node n) {
+		Bounds b = n.localToScene(n.getBoundsInLocal());
+//		aa.getTransforms().add(new Translate(0.0, 0.0, -512.0));
+//		Bounds aaboundsInSceneaft = aa.localToScene(aa.getBoundsInLocal());
+//		
+//		System.out.println(camboundsInScene);
+//		System.out.println("Before: " + aaboundsInScene);
+//		System.out.println("After: " + aaboundsInSceneaft);
+		
+		System.out.println("bou:" + b);
+		double tx, ty, tz;
+		
+		if (b.getMinX() > 0.0)
+			tx = - (b.getWidth() / 2 + b.getMinX());
+		else
+			tx = Math.abs(b.getMinX()) - b.getWidth() / 2;
+		
+		if (b.getMinY() > 0.0)
+			ty = - (b.getHeight() / 2 + b.getMinY());
+		else
+			ty = Math.abs(b.getMinY()) - b.getHeight() / 2;
+		
+		if (b.getMinZ() > 0.0)
+			tz = - (b.getDepth() / 2 + b.getMinZ());
+		else
+			tz = Math.abs(b.getMinZ()) - b.getDepth() / 2;
+		
+		System.out.println("trans_x:" + tx + " y: " + ty + " z: " + tz);
+		
+		n.getTransforms().add(new Translate(tx, ty, tz));
+		
+		return n;
 	}
 
 	private Group cratePrimitives() {
@@ -198,12 +243,12 @@ public class PlyVis {
 		mv.setScaleY(0.5);
 		mv.setScaleZ(0.5);
 		
-		double a = 6.0 - 2500.0 / 2 + 750;
-		double b = -90.0 - Math.abs(bounds.getMaxY()) / 2 -500; // green
-		double c = -209.0 + Math.abs(bounds.getMinZ()) - 2000; // blue
-		mv.setTranslateX(a);
-		mv.setTranslateY(b);
-		mv.setTranslateZ(c);
+//		double a = 6.0 - 2500.0 / 2 + 750;
+//		double b = -90.0 - Math.abs(bounds.getMaxY()) / 2 -500; // green
+//		double c = -209.0 + Math.abs(bounds.getMinZ()) - 2000; // blue
+//		mv.setTranslateX(a);
+//		mv.setTranslateY(b);
+//		mv.setTranslateZ(c);
 		
 		Group g = new Group();
 		g.getChildren().add(mv);
@@ -219,7 +264,7 @@ public class PlyVis {
 		return (SubScene) create(true, vismode);
 	}
 	
-	private Group buildAxes() {
+	private Node buildAxes() {
         final PhongMaterial redMaterial = new PhongMaterial();
         redMaterial.setDiffuseColor(Color.DARKRED);
         redMaterial.setSpecularColor(Color.RED);
