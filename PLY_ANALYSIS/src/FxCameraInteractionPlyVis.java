@@ -19,15 +19,11 @@ public class FxCameraInteractionPlyVis {
 	private final int numberOfBins;
 	double anchorX, anchorY, anchorAngle;
 	double oldX, oldY;
-	boolean aniStop = false;
-	private boolean showAxis = true;
-	private Group group;
 	
 	public FxCameraInteractionPlyVis(SubScene scene, Group group, PerspectiveCamera cam, FxCameraAnnimation camAni, int camZdist, int numberOfBins) {
 		this.camZdist = camZdist;
 		this.numberOfBins = numberOfBins;
 		addInteraction(scene, cam, camAni);
-		this.group = group;
 	}
 	
 	public void addInteraction(SubScene scene, final PerspectiveCamera cam, FxCameraAnnimation camAni) {
@@ -89,7 +85,7 @@ public class FxCameraInteractionPlyVis {
 			@Override
 			public void handle(KeyEvent ke) {
 				if (ke.getCode() == KeyCode.UP) {
-					// System.out.println("Key Pressed: " + ke.getCode() + camZdist);
+					System.out.println("Key Pressed: " + ke.getCode() + camZdist);
 					cam.getTransforms().add(new Translate(0, 0, -camZdist));
 					cam.getTransforms().add(new Rotate(5, Rotate.X_AXIS));
 					cam.getTransforms().add(new Translate(0, 0, camZdist));
@@ -114,28 +110,6 @@ public class FxCameraInteractionPlyVis {
 					cam.getTransforms().add(new Translate(0, 0, -camZdist));
 					cam.getTransforms().add(new Rotate(-5, Rotate.Y_AXIS));
 					cam.getTransforms().add(new Translate(0, 0, camZdist));
-				}
-				
-				if (ke.getCode() == KeyCode.S) {
-					if (!aniStop) {
-						camAni.pauseAnimation();
-						aniStop = true;
-					} else {
-						camAni.startAnimation();
-						aniStop = false;
-					}
-				}
-				
-				if (ke.getCode() == KeyCode.G) {
-					if (showAxis) {
-						System.out.println("Pressed G - > dis");
-						group.getChildren().get(0).setVisible(false);
-						showAxis = false;
-					} else {
-						System.out.println("Pressed G - > en");
-						group.getChildren().get(0).setVisible(true);
-						showAxis = true;
-					}
 				}
 			}
 		});

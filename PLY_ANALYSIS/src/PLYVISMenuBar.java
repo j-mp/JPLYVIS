@@ -13,6 +13,8 @@ import javafx.scene.SubScene;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
@@ -26,15 +28,51 @@ import jply.Property;
 
 public class PLYVISMenuBar {
 
+	
 	private Stage stage;
 	private SubScene visGroup;
 	private BorderPane bp;
-	private PLYVisMode vismode = PLYVisMode.MESH_FULL;
+	private static PLYSettings settings;
+	PlyVis vis = null;
 
-	public PLYVISMenuBar(Stage stage, SubScene visGroup, BorderPane bp) {
+	public PLYVISMenuBar(Stage stage, SubScene visGroup, BorderPane bp, PLYSettings settings) {
 		this.stage = stage;
 		this.visGroup = visGroup;
 		this.bp = bp;
+		this.settings = settings;
+	}
+
+	private void createKeyBindsforVis(SubScene visGroup, PLYSettings settings) {
+		this.visGroup.setOnKeyPressed(new EventHandler<KeyEvent>() {
+
+			@Override
+			public void handle(KeyEvent ke) {
+		
+				if (ke.getCode() == KeyCode.S) {
+					   if (settings.animode.get()) {
+						   vis.camAni.stopAnimation();
+						   settings.animode.set(false);
+					   } else {
+						   vis.camAni.startAnimation();
+						   settings.animode.set(true);
+					   }
+				}
+				
+				if (ke.getCode() == KeyCode.G) {
+					if (settings.showAxis.get()) {
+						System.out.println("Pressed G - > dis");
+						Node n = visGroup.lookup("VISPLY");
+						System.out.println(n.getId());
+						//get(0).setVisible(false);
+						settings.showAxis.set(false);
+					} else {
+						System.out.println("Pressed G - > en");
+						visGroup.getParent().getChildrenUnmodifiable().get(0).setVisible(true);
+						settings.showAxis.set(true);
+					}
+				}
+			}
+		});
 	}
 	
 	public Node getNode() {
@@ -57,16 +95,16 @@ public class PLYVISMenuBar {
         	   File file = fileChooser.showOpenDialog(stage);
         	   if (file != null) {
         		   ArrayList<Point4f> pointlist;
-        		   PlyVis vis = null;
         		   try {
         			   pointlist = loadData(file.getAbsolutePath());
         			   vis = new PlyVis(pointlist);
         			   System.out.println("Fin loading.");
-        			   visGroup = vis.createSubScene(vismode);
+        			   visGroup = vis.createSubScene(PLYVisMode.valueOf(settings.vismode));
         			   VBox vbox = new VBox();
         			   vbox.getChildren().add(visGroup);
         			   bp.setBottom(vbox);
         			   stage.setTitle("PLY Vis | " + file.getAbsolutePath());
+        			   createKeyBindsforVis(visGroup, settings);
         		   } catch (IOException e) {
         			   // TODO Auto-generated catch block
         			   System.out.println("Could not load data.");
@@ -117,10 +155,35 @@ public class PLYVISMenuBar {
                );
        showcoords.setOnAction(new EventHandler<ActionEvent>() {
 		   public void handle(ActionEvent t) {
-       }
-   }); 
+				if (settings.showAxis.get()) {
+					Node n = visGroup.getRoot().lookup("#PLYVIS");
+					n.lookup("AXIS").setVisible(false);
+					settings.showAxis.set(false);
+				} else {
+					Node n = visGroup.getRoot().lookup("#PLYVIS");
+					n.lookup("AXIS").setVisible(true);
+					settings.showAxis.set(true);
+				}
+		   }
+       }); 
+       
+       MenuItem animate = new MenuItem("Start/Stop animation"
+//    		   , new ImageView(new Image("menusample/new.png"))
+               );
+       animate.setOnAction(new EventHandler<ActionEvent>() {
+		   public void handle(ActionEvent t) {
+			   Boolean a = settings.animode.getValue();
+			   if (a) {
+				   vis.camAni.stopAnimation();
+				   settings.animode.set(false);
+			   } else {
+				   vis.camAni.startAnimation();
+				   settings.animode.set(true);
+			   }
+		   }
+       }); 
 
-       menuView.getItems().addAll(showcoords);
+       menuView.getItems().addAll(showcoords, animate);
 
        menuBar.getMenus().addAll(menuFile, menuEdit, menuView);
        return menuBar;
@@ -129,7 +192,7 @@ public class PLYVISMenuBar {
     private static void configureFileChooser(final FileChooser fileChooser){                           
 	    fileChooser.setTitle("Open .ply file");
 	    fileChooser.setInitialDirectory(
-	        new File(System.getProperty("user.home") + "")
+	        new File(settings.defaultFilePath.get())
 	    );
 	    
         fileChooser.getExtensionFilters().addAll(

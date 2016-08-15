@@ -33,6 +33,7 @@ public class PlyVis {
 	private static final double AXIS_WIDTH = 25.0;
 	int width = 1024;
 	int height = 768;
+	public FxCameraAnnimation camAni;
 	
 	private ArrayList<Point4f> points;
 
@@ -62,9 +63,6 @@ public class PlyVis {
 				break;
 		}
 		
-		root.getChildren().add(0, movetoOrgin(buildAxes()));
-		root.getChildren().add(1, movetoOrgin(n));
-		
 		// Creating Ambient Light
 		AmbientLight ambient = new AmbientLight();
 		ambient.setColor(Color.rgb(200, 200, 200, 0.9));
@@ -77,8 +75,13 @@ public class PlyVis {
 			point.setTranslateZ(-10000);
 			point.getScope().add(n);
 			
-			root.getChildren().addAll(ambient); // point
+
 		}
+		
+		root.getChildren().add(0, movetoOrgin(buildAxes()));
+		root.getChildren().add(1, movetoOrgin(n));
+		root.getChildren().add(2, ambient); // point
+		root.setId("PLYVIS");
 		
 		// Adding to scene
 		
@@ -97,22 +100,8 @@ public class PlyVis {
 		Translate tz = new Translate(0.0, 0.0, camZdist);
 		cam.getTransforms().addAll(rx, ry, rz, tz);
 		
-//		Bounds camboundsInScene = cam.localToScene(cam.getBoundsInLocal());
-//		
-//		Bounds cambs = cam.localToScreen(cam.getBoundsInLocal());
-//		
-//		Node aa = root.getChildren().get(0);
-//		Bounds aaboundsInScene = aa.localToScene(aa.getBoundsInLocal());
-//		System.out.println(aaboundsInScene);
-//		aa.getTransforms().add(new Translate(0.0, 0.0, -512.0));
-//		Bounds aaboundsInSceneaft = aa.localToScene(aa.getBoundsInLocal());
-//		
-//		System.out.println(camboundsInScene);
-//		System.out.println("Before: " + aaboundsInScene);
-//		System.out.println("After: " + aaboundsInSceneaft);
-		
-		FxCameraAnnimation camAni = new FxCameraAnnimation(cam);
-//		camAni.startAnimation();
+		camAni = new FxCameraAnnimation(cam);
+		camAni.startAnimation();
 		
 		Object returnscene;
 		if (suborly) {
@@ -136,12 +125,6 @@ public class PlyVis {
 
 	private Node movetoOrgin(Node n) {
 		Bounds b = n.localToScene(n.getBoundsInLocal());
-//		aa.getTransforms().add(new Translate(0.0, 0.0, -512.0));
-//		Bounds aaboundsInSceneaft = aa.localToScene(aa.getBoundsInLocal());
-//		
-//		System.out.println(camboundsInScene);
-//		System.out.println("Before: " + aaboundsInScene);
-//		System.out.println("After: " + aaboundsInSceneaft);
 		
 		System.out.println("bou:" + b);
 		double tx, ty, tz;
@@ -243,13 +226,6 @@ public class PlyVis {
 		mv.setScaleY(0.5);
 		mv.setScaleZ(0.5);
 		
-//		double a = 6.0 - 2500.0 / 2 + 750;
-//		double b = -90.0 - Math.abs(bounds.getMaxY()) / 2 -500; // green
-//		double c = -209.0 + Math.abs(bounds.getMinZ()) - 2000; // blue
-//		mv.setTranslateX(a);
-//		mv.setTranslateY(b);
-//		mv.setTranslateZ(c);
-		
 		Group g = new Group();
 		g.getChildren().add(mv);
 		
@@ -290,6 +266,7 @@ public class PlyVis {
         
         Group axisGroup = new Group();
 		axisGroup.getChildren().addAll(xAxis, yAxis, zAxis);
+		axisGroup.setId("AXIS");
         axisGroup.setVisible(true);
         
         return axisGroup;

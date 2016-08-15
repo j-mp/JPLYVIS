@@ -83,6 +83,7 @@ public class main extends Application{
 	Group g;
 	Stage primaryStage;
 	BorderPane bp;
+	PLYSettings settings;
 	
 	@Override
 	public void start(Stage primaryStage) throws Exception {
@@ -117,13 +118,14 @@ public class main extends Application{
 
 	private Scene createGuiScene(Stage stage) {
 		
+		settings = new PLYSettings();
 		HBox hbox = new HBox(4.0);
 		bp = new BorderPane();
 		bp.setTop(hbox);
 		bp.setMinWidth(1024);
 		
 
-		Node m = new PLYVISMenuBar(stage, visGroup, bp).getNode();
+		Node m = new PLYVISMenuBar(stage, visGroup, bp, settings).getNode();
 		hbox.getChildren().addAll(m);
 		HBox.setHgrow(m, Priority.ALWAYS);
 		
