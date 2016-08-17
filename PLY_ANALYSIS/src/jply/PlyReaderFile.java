@@ -55,7 +55,7 @@ public final class PlyReaderFile implements PlyReader {
     private ElementReader currentReader;
     /** Raw header lines */
     public List<String> rawHeaders;
-	private boolean debug = true;
+	private boolean debug = false;
 
     /**
      * Opens a PLY file.

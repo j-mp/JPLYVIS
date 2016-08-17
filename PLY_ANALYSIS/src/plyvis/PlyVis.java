@@ -1,34 +1,26 @@
 package plyvis;
 import java.util.ArrayList;
 
-import javax.vecmath.Point3d;
-
 import com.sun.scenario.Settings;
 
 import iap.blocks.debug.FxCameraAnnimation;
 import javafx.geometry.Bounds;
 import javafx.scene.AmbientLight;
 import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.PerspectiveCamera;
 import javafx.scene.PointLight;
-import javafx.scene.Scene;
 import javafx.scene.SceneAntialiasing;
 import javafx.scene.SubScene;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Material;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Box;
 import javafx.scene.shape.CullFace;
 import javafx.scene.shape.DrawMode;
 import javafx.scene.shape.MeshView;
+import javafx.scene.shape.Shape3D;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Translate;
-import javafx.scene.shape.Shape;
-import javafx.scene.shape.Shape3D;
-import javafx.scene.shape.Sphere;
-import javafx.scene.Node;
-import javafx.scene.shape.Line;
-import javafx.scene.shape.*;
 
 public class PlyVis {
 
@@ -40,8 +32,10 @@ public class PlyVis {
 	
 	private ArrayList<Point4f> points;
 
-	public PlyVis(ArrayList<Point4f> points) {
+	public PlyVis(ArrayList<Point4f> points, int w, int h) {
 		this.points = points;
+		this.width = w;
+		this.height = h;
 	}
 	
 	double anchorX, anchorY, anchorAngle;
@@ -107,7 +101,7 @@ public class PlyVis {
 		
 		Object returnscene;
 
-		SubScene scene = new SubScene(root, 1024, 768, true, SceneAntialiasing.BALANCED);
+		SubScene scene = new SubScene(root, width, height, true, SceneAntialiasing.BALANCED);
 //		scene.setFill(new LinearGradient(0, 0, 0, 1, true, CycleMethod.NO_CYCLE, stops));
 	    scene.setFill(Color.WHITESMOKE);
 		scene.setCamera(cam);
@@ -122,7 +116,7 @@ public class PlyVis {
 	public Node movetoOrgin(Node n) {
 		Bounds b = n.localToScene(n.getBoundsInLocal());
 		
-		System.out.println("bou:" + b);
+		// System.out.println("bou:" + b);
 		double tx, ty, tz;
 		
 		if (b.getMinX() > 0.0)
@@ -140,7 +134,7 @@ public class PlyVis {
 		else
 			tz = Math.abs(b.getMinZ()) - b.getDepth() / 2;
 		
-		System.out.println("trans_x:" + tx + " y: " + ty + " z: " + tz);
+//		System.out.println("trans_x:" + tx + " y: " + ty + " z: " + tz);
 		
 		n.getTransforms().add(new Translate(tx, ty, tz));
 		
@@ -206,7 +200,7 @@ public class PlyVis {
 		
 		Bounds bounds = mv.getBoundsInParent();
 		
-		System.out.println(bounds.toString());
+//		System.out.println(bounds.toString());
 
 		mv.setScaleX(0.5);
 		mv.setScaleY(0.5);

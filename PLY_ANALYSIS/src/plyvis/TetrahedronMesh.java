@@ -5,8 +5,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 
-import javax.vecmath.Point3d;
-
 import javafx.scene.shape.TriangleMesh;
 
 public class TetrahedronMesh extends TriangleMesh {

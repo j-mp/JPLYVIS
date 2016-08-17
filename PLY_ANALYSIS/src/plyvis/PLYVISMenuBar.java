@@ -3,30 +3,28 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map.Entry;
 
 import javax.imageio.ImageIO;
-import javax.vecmath.Point3d;
 
-import org.jfree.ui.ExtensionFileFilter;
-
-import javafx.beans.property.SimpleBooleanProperty;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.Node;
-import javafx.scene.Scene;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.SubScene;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.RadioMenuItem;
+import javafx.scene.control.ToggleGroup;
+import javafx.scene.image.WritableImage;
 import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyCombination;
-import javafx.scene.input.KeyEvent;
+import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
+import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
 import jply.Element;
 import jply.ElementReader;
@@ -34,12 +32,6 @@ import jply.ElementType;
 import jply.PlyReader;
 import jply.PlyReaderFile;
 import jply.Property;
-import javafx.scene.control.ToggleGroup;
-import javafx.scene.image.WritableImage;
-import javafx.scene.control.RadioMenuItem;
-import javafx.scene.input.KeyCodeCombination;
-import javafx.embed.swing.SwingFXUtils;
-import javafx.stage.FileChooser.ExtensionFilter;
 
 public class PLYVISMenuBar {
 
@@ -77,9 +69,9 @@ public class PLYVISMenuBar {
         		   ArrayList<Point4f> pointlist;
         		   try {
         			   pointlist = loadData(file.getAbsolutePath());
-        			   System.out.println(PLYSettings.vismode.toString());
-        			   vis = new PlyVis(pointlist);
-        			   System.out.println("Fin loading.");
+        			   // System.out.println(PLYSettings.vismode.toString());
+        			   vis = new PlyVis(pointlist, (int) 1024, (int) 768);
+        			   // System.out.println("Fin loading.");
         			   visGroup = vis.createSubScene(PLYVisMode.valueOf(PLYSettings.vismode));
         			   visGroup.setId("visGroup");
         			   VBox vbox = new VBox();
@@ -103,7 +95,7 @@ public class PLYVISMenuBar {
                    );
        exit.setOnAction(new EventHandler<ActionEvent>() {
     	   public void handle(ActionEvent t) {
-    		   System.out.println("exit");
+    		   // System.out.println("exit");
     		   System.exit(0);
            }
        });
@@ -256,16 +248,17 @@ public class PLYVISMenuBar {
 		
 		List<String> header = ply.getRawHeaders();
 		
-		for (String s : header) {
-			System.out.println(s);
+		if (PLYSettings.debug.getValue()) {
+			for (String s : header) {
+				System.out.println(s);
+			}
+			
+			List<ElementType> etypes = ply.getElementTypes();
+			
+			for (ElementType et : etypes) {
+				System.out.println(et.getName());
+			}
 		}
-		
-		List<ElementType> etypes = ply.getElementTypes();
-		
-		for (ElementType et : etypes) {
-			System.out.println(et.getName());
-		}
-		
 		ArrayList<Point4f> points = readElements(ply);
 		
 		return points;
@@ -328,12 +321,13 @@ public class PLYVISMenuBar {
 			if (z < min_z)
 				min_z = z;
 			
-			if (z > 226f)
+//			if (z > 226f)
 			points.add(new Point4f((float) x, (float) y, (float) z, (float) intensity));
 
 		}
 		
-		System.out.println("Inp-bounds: " + min_x + ":" + max_x + " | "  + min_y + ":" + max_y + " | "  + min_z + ":" + max_z);
+		if (PLYSettings.debug.getValue())
+			System.out.println("Inp-bounds: " + min_x + ":" + max_x + " | "  + min_y + ":" + max_y + " | "  + min_z + ":" + max_z);
 		
 		reader.close();
 
