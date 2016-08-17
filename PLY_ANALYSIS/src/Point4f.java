@@ -1,5 +1,6 @@
+import java.io.Serializable;
 
-public class Point4f {
+public class Point4f implements Serializable {
 
 	public float getX() {
 		return x;

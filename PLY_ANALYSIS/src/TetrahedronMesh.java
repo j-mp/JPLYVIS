@@ -1,3 +1,7 @@
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 
 import javax.vecmath.Point3d;
@@ -9,7 +13,7 @@ public class TetrahedronMesh extends TriangleMesh {
     private int[] facesLink;
 
     public TetrahedronMesh(double length, ArrayList<Point4f> v) {
-        this.vertices = v;
+        this.vertices = (ArrayList<Point4f>) deepClone(v);
         if (length > 0.0) {
             float[] points = new float[vertices.size() * 12];
             int[] faces = new int[vertices.size() * 6]; // 24
@@ -94,5 +98,23 @@ public class TetrahedronMesh extends TriangleMesh {
 
     public Point4f getPointFromFace(int faceId) {
         return vertices.get(facesLink[faceId]);
+    }
+    
+    /**
+     * This method makes a "deep clone" of any object it is given.
+     */
+    public static Object deepClone(Object object) {
+      try {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ObjectOutputStream oos = new ObjectOutputStream(baos);
+        oos.writeObject(object);
+        ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+        ObjectInputStream ois = new ObjectInputStream(bais);
+        return ois.readObject();
+      }
+      catch (Exception e) {
+        e.printStackTrace();
+        return null;
+      }
     }
 }

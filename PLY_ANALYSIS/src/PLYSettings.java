@@ -8,10 +8,10 @@ import javafx.beans.property.SimpleStringProperty;
 
 public class PLYSettings {
 
-	BooleanProperty animode;
-	StringProperty defaultFilePath;
-	IntegerProperty vismode;
-	BooleanProperty showAxis;
+	public static BooleanProperty animode;
+	public static StringProperty defaultFilePath;
+	public static IntegerProperty vismode;
+	public static BooleanProperty showAxis;
 	
 	public PLYSettings() {
 		animode = new SimpleBooleanProperty(this, "RunAnnimation", true);

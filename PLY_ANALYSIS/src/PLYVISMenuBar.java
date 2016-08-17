@@ -2,13 +2,16 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map.Entry;
 
 import javax.imageio.ImageIO;
 import javax.vecmath.Point3d;
 
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.SubScene;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
@@ -25,6 +28,8 @@ import jply.ElementType;
 import jply.PlyReader;
 import jply.PlyReaderFile;
 import jply.Property;
+import javafx.scene.control.ToggleGroup;
+import javafx.scene.control.RadioMenuItem;
 
 public class PLYVISMenuBar {
 
@@ -32,44 +37,32 @@ public class PLYVISMenuBar {
 	private Stage stage;
 	private SubScene visGroup;
 	private BorderPane bp;
-	private static PLYSettings settings;
 	PlyVis vis = null;
 
-	public PLYVISMenuBar(Stage stage, SubScene visGroup, BorderPane bp, PLYSettings settings) {
+	public PLYVISMenuBar(Stage stage, SubScene visGroup, BorderPane bp) {
 		this.stage = stage;
 		this.visGroup = visGroup;
 		this.bp = bp;
-		this.settings = settings;
 	}
 
-	private void createKeyBindsforVis(SubScene visGroup, PLYSettings settings) {
+	private void createKeyBindsforVis(Scene scene) {
 		this.visGroup.setOnKeyPressed(new EventHandler<KeyEvent>() {
 
 			@Override
 			public void handle(KeyEvent ke) {
 		
 				if (ke.getCode() == KeyCode.S) {
-					   if (settings.animode.get()) {
+					   if (PLYSettings.animode.get()) {
 						   vis.camAni.stopAnimation();
-						   settings.animode.set(false);
+						   PLYSettings.animode.set(false);
 					   } else {
 						   vis.camAni.startAnimation();
-						   settings.animode.set(true);
+						   PLYSettings.animode.set(true);
 					   }
 				}
 				
 				if (ke.getCode() == KeyCode.G) {
-					if (settings.showAxis.get()) {
-						System.out.println("Pressed G - > dis");
-						Node n = visGroup.lookup("VISPLY");
-						System.out.println(n.getId());
-						//get(0).setVisible(false);
-						settings.showAxis.set(false);
-					} else {
-						System.out.println("Pressed G - > en");
-						visGroup.getParent().getChildrenUnmodifiable().get(0).setVisible(true);
-						settings.showAxis.set(true);
-					}
+					checkAxes();
 				}
 			}
 		});
@@ -97,14 +90,16 @@ public class PLYVISMenuBar {
         		   ArrayList<Point4f> pointlist;
         		   try {
         			   pointlist = loadData(file.getAbsolutePath());
+        			   System.out.println(PLYSettings.vismode.toString());
         			   vis = new PlyVis(pointlist);
         			   System.out.println("Fin loading.");
-        			   visGroup = vis.createSubScene(PLYVisMode.valueOf(settings.vismode));
+        			   visGroup = vis.createSubScene(PLYVisMode.valueOf(PLYSettings.vismode));
+        			   visGroup.setId("visGroup");
         			   VBox vbox = new VBox();
+        			   vbox.setId("visGroupVbox");
         			   vbox.getChildren().add(visGroup);
         			   bp.setBottom(vbox);
         			   stage.setTitle("PLY Vis | " + file.getAbsolutePath());
-        			   createKeyBindsforVis(visGroup, settings);
         		   } catch (IOException e) {
         			   // TODO Auto-generated catch block
         			   System.out.println("Could not load data.");
@@ -142,8 +137,7 @@ public class PLYVISMenuBar {
 				   System.out.println("");
                }
            }
-       }
-    		   );
+       });
 
        menuEdit.getItems().addAll(saveScreenShot);
        
@@ -155,15 +149,7 @@ public class PLYVISMenuBar {
                );
        showcoords.setOnAction(new EventHandler<ActionEvent>() {
 		   public void handle(ActionEvent t) {
-				if (settings.showAxis.get()) {
-					Node n = visGroup.getRoot().lookup("#PLYVIS");
-					n.lookup("AXIS").setVisible(false);
-					settings.showAxis.set(false);
-				} else {
-					Node n = visGroup.getRoot().lookup("#PLYVIS");
-					n.lookup("AXIS").setVisible(true);
-					settings.showAxis.set(true);
-				}
+				checkAxes();
 		   }
        }); 
        
@@ -172,27 +158,69 @@ public class PLYVISMenuBar {
                );
        animate.setOnAction(new EventHandler<ActionEvent>() {
 		   public void handle(ActionEvent t) {
-			   Boolean a = settings.animode.getValue();
+			   Boolean a = PLYSettings.animode.getValue();
 			   if (a) {
 				   vis.camAni.stopAnimation();
-				   settings.animode.set(false);
+				   PLYSettings.animode.set(false);
 			   } else {
 				   vis.camAni.startAnimation();
-				   settings.animode.set(true);
+				   PLYSettings.animode.set(true);
 			   }
 		   }
-       }); 
+       });
+       
+       Menu subMenu_VisMode = new Menu("Vismode");
+       final ToggleGroup groupVismode = new ToggleGroup();
+       for (PLYVisMode mode : PLYVisMode.values()) {
+    	   RadioMenuItem itemVismode = new RadioMenuItem(mode.name());
+    	   itemVismode.setId(mode.name());
+    	   
+    	   if (PLYSettings.vismode.getValue().compareTo(mode.toInt()) == 0)
+    		   itemVismode.setSelected(true);
+    	   
+    	   itemVismode.setToggleGroup(groupVismode);
+           itemVismode.setOnAction(new EventHandler<ActionEvent>() {
+		   
+        	   public void handle(ActionEvent t) {
+        		   // rm old
+        		   Group root = (Group) visGroup.getRoot().lookup("#PLYVIS");
+        		   root.lookup("#vis").setVisible(true);
+        		   root.getChildren().remove(root.lookup("#vis"));
+        		   
+        		   Node n = new Group();
+        		   switch (PLYVisMode.valueOf(itemVismode.getId())) {
+        		   		case MESH_LINES:
+        		   			PLYSettings.vismode.set(PLYVisMode.MESH_LINES.toInt());
+	        				n = vis.createMeshView(true);
+	        				break;
+	        			case MESH_FULL:
+	        				PLYSettings.vismode.set(PLYVisMode.MESH_FULL.toInt());
+	        				n = vis.createMeshView(false);
+	        				break;
+	        			case PRIMITIVES:
+	        				PLYSettings.vismode.set(PLYVisMode.PRIMITIVES.toInt());
+	        				n = vis.createPrimitives();
+	        				break;
+	        		}
 
-       menuView.getItems().addAll(showcoords, animate);
+        		   Node nn = vis.movetoOrgin(n);
+        		   nn.setId("vis");
+        		   root.getChildren().add(n);
+        	   }
+           });
+           subMenu_VisMode.getItems().add(itemVismode);
+       }
+
+       menuView.getItems().addAll(showcoords, animate, subMenu_VisMode);
 
        menuBar.getMenus().addAll(menuFile, menuEdit, menuView);
        return menuBar;
 	}
 	
-    private static void configureFileChooser(final FileChooser fileChooser){                           
+    private void configureFileChooser(final FileChooser fileChooser){                           
 	    fileChooser.setTitle("Open .ply file");
 	    fileChooser.setInitialDirectory(
-	        new File(settings.defaultFilePath.get())
+	        new File(PLYSettings.defaultFilePath.get())
 	    );
 	    
         fileChooser.getExtensionFilters().addAll(
@@ -288,5 +316,17 @@ public class PLYVISMenuBar {
 		reader.close();
 
 		return points;
+	}
+
+	private void checkAxes() {
+		if (PLYSettings.showAxis.get()) {
+			Node n = visGroup.getRoot().lookup("#PLYVIS");
+			n.lookup("#AXIS").setVisible(false);
+			PLYSettings.showAxis.set(false);
+		} else {
+			Node n = visGroup.getRoot().lookup("#PLYVIS");
+			n.lookup("#AXIS").setVisible(true);
+			PLYSettings.showAxis.set(true);
+		}
 	}
 }

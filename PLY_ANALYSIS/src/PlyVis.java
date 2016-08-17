@@ -2,6 +2,8 @@ import java.util.ArrayList;
 
 import javax.vecmath.Point3d;
 
+import com.sun.scenario.Settings;
+
 import iap.blocks.debug.FxCameraAnnimation;
 import javafx.geometry.Bounds;
 import javafx.scene.AmbientLight;
@@ -43,12 +45,12 @@ public class PlyVis {
 	
 	double anchorX, anchorY, anchorAngle;
 	
-	public Object create(boolean suborly, PLYVisMode mode) {
+	public Object createIntialThreeDScene(boolean suborly, PLYVisMode mode) {
 		// Container
 		Group root = new Group();
 		root.setRotationAxis(Rotate.Y_AXIS);
 		
-		// Creating Mesh
+		// Creating 3D
 		Node n = new Group();
 		
 		switch (mode) {
@@ -59,7 +61,7 @@ public class PlyVis {
 				n = createMeshView(false);
 				break;
 			case PRIMITIVES:
-				n = cratePrimitives();
+				n = createPrimitives();
 				break;
 		}
 		
@@ -77,13 +79,12 @@ public class PlyVis {
 			
 
 		}
-		
-		root.getChildren().add(0, movetoOrgin(buildAxes()));
-		root.getChildren().add(1, movetoOrgin(n));
-		root.getChildren().add(2, ambient); // point
+			
+		n.setId("vis");
+		root.getChildren().add(movetoOrgin(buildAxes()));
+		root.getChildren().add(movetoOrgin(n));
+		root.getChildren().add(ambient); // point
 		root.setId("PLYVIS");
-		
-		// Adding to scene
 		
 //		ArrayList<Stop> stops = new ArrayList<Stop>();
 //		stops.add(new Stop(0, Color.DARKBLUE));
@@ -104,26 +105,20 @@ public class PlyVis {
 		camAni.startAnimation();
 		
 		Object returnscene;
-		if (suborly) {
-			SubScene scene = new SubScene(root, 1024, 768, true, SceneAntialiasing.BALANCED);
-//			scene.setFill(new LinearGradient(0, 0, 0, 1, true, CycleMethod.NO_CYCLE, stops));
-		    scene.setFill(Color.WHITESMOKE);
-			scene.setCamera(cam);
-			returnscene = scene;
-		} else {
-			Scene scene = new Scene(root, 1024, 768, true, SceneAntialiasing.BALANCED);
-//			scene.setFill(new LinearGradient(0, 0, 0, 1, true, CycleMethod.NO_CYCLE, stops));
-		    scene.setFill(Color.WHITESMOKE);
-			scene.setCamera(cam);
-			returnscene = scene;
-		}
+
+		SubScene scene = new SubScene(root, 1024, 768, true, SceneAntialiasing.BALANCED);
+//		scene.setFill(new LinearGradient(0, 0, 0, 1, true, CycleMethod.NO_CYCLE, stops));
+	    scene.setFill(Color.WHITESMOKE);
+		scene.setCamera(cam);
+		returnscene = scene;
+
 		
 		new FxCameraInteractionPlyVis((SubScene)returnscene, root, cam, camAni, camZdist, 100);
 		
 		return returnscene;
 	}
 
-	private Node movetoOrgin(Node n) {
+	public Node movetoOrgin(Node n) {
 		Bounds b = n.localToScene(n.getBoundsInLocal());
 		
 		System.out.println("bou:" + b);
@@ -151,19 +146,12 @@ public class PlyVis {
 		return n;
 	}
 
-	private Group cratePrimitives() {
+	public Group createPrimitives() {
 		ArrayList<Shape3D> shapes = new ArrayList<>();
-		for (int i = 0; i < points.size(); i+=20) {
+		for (int i = 0; i < points.size(); i+=2) {
 			Point4f p = points.get(i);
-			// new Box(1.0, 1.0, 1.0);
 
-
-
-			Polygon prim = new Polygon();
-			prim.getPoints().addAll(new Double[]{
-			    0.0, 0.0,
-			    20.0, 10.0,
-			    10.0, 20.0 });
+			Box prim = new Box(10.0, 10.0, 10.0);
 			
 			Color col = new Color(p.intensity / 255d, p.intensity / 255d, p.intensity / 255d, 1.0);
 			
@@ -174,24 +162,14 @@ public class PlyVis {
 			material.setSpecularColor(col);
 			material.setSpecularPower(39.0);
 			prim.setMaterial(material);
-			//		c.setTranslateX(rand + xc + (x - n / 2d) * radius);
-			//		c.setTranslateY(rand + yc + (y - n / 2d) * radius);
-			//		c.setTranslateZ(rand + (z - n / 2d) * radius);
-			
-			prim.setScaleX(100.0);
-			prim.setScaleY(100.0);
-			prim.setScaleZ(100.0);
-			
-			double a = 6.0 - 2500.0 / 2 + 750;
-			double b = -90.0 - Math.abs(16503) / 2 -500; // green
-			double c = -209.0 + Math.abs(-23257) - 2000; // blue
-			prim.setTranslateX(a + p.x*100);
-			prim.setTranslateY(b + p.y*100);
-			prim.setTranslateZ(c + p.z*100);
-			
+
+			prim.setTranslateX(p.x * 50);
+			prim.setTranslateY(p.y * 50);
+			prim.setTranslateZ(p.z * -50);
 			
 			shapes.add(prim);
 		}
+		
 		Group res = new Group();
 		
 		for (Shape3D sh : shapes)
@@ -200,7 +178,7 @@ public class PlyVis {
 		return res;
 	}
 	
-	private Group createMeshView(boolean showLines) {
+	public Group createMeshView(boolean showLines) {
 		TetrahedronMesh tm = new TetrahedronMesh(25.0, points);
 		
 		MeshView mv;
@@ -232,12 +210,9 @@ public class PlyVis {
 		return g;
 	}
 	
-	public Scene createScene(PLYVisMode vismode) {
-		return (Scene) create(false, vismode);
-	}
 	
 	public SubScene createSubScene(PLYVisMode vismode) {
-		return (SubScene) create(true, vismode);
+		return (SubScene) createIntialThreeDScene(true, vismode);
 	}
 	
 	private Node buildAxes() {
@@ -267,7 +242,11 @@ public class PlyVis {
         Group axisGroup = new Group();
 		axisGroup.getChildren().addAll(xAxis, yAxis, zAxis);
 		axisGroup.setId("AXIS");
-        axisGroup.setVisible(true);
+		
+		if (Settings.getBoolean("Show axes"))
+			axisGroup.setVisible(true);
+		else
+			axisGroup.setVisible(false);
         
         return axisGroup;
     }
