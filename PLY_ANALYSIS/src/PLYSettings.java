@@ -12,11 +12,13 @@ public class PLYSettings {
 	public static StringProperty defaultFilePath;
 	public static IntegerProperty vismode;
 	public static BooleanProperty showAxis;
+	public static BooleanProperty debug;
 	
 	public PLYSettings() {
 		animode = new SimpleBooleanProperty(this, "RunAnnimation", true);
 		defaultFilePath = new SimpleStringProperty(this, "Default file path", System.getProperty("user.home") + "/Desktop/");
 		vismode = new SimpleIntegerProperty(this, "Vis mode", PLYVisMode.MESH_FULL.toInt());
 		showAxis = new SimpleBooleanProperty(this, "Show axes", false);
+		debug = new SimpleBooleanProperty(this, "Debug", false);
 	}
 }

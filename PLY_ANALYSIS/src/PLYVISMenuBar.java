@@ -7,16 +7,21 @@ import java.util.Map.Entry;
 import javax.imageio.ImageIO;
 import javax.vecmath.Point3d;
 
+import org.jfree.ui.ExtensionFileFilter;
+
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.SubScene;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
@@ -29,7 +34,11 @@ import jply.PlyReader;
 import jply.PlyReaderFile;
 import jply.Property;
 import javafx.scene.control.ToggleGroup;
+import javafx.scene.image.WritableImage;
 import javafx.scene.control.RadioMenuItem;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.embed.swing.SwingFXUtils;
+import javafx.stage.FileChooser.ExtensionFilter;
 
 public class PLYVISMenuBar {
 
@@ -44,29 +53,6 @@ public class PLYVISMenuBar {
 		this.visGroup = visGroup;
 		this.bp = bp;
 	}
-
-	private void createKeyBindsforVis(Scene scene) {
-		this.visGroup.setOnKeyPressed(new EventHandler<KeyEvent>() {
-
-			@Override
-			public void handle(KeyEvent ke) {
-		
-				if (ke.getCode() == KeyCode.S) {
-					   if (PLYSettings.animode.get()) {
-						   vis.camAni.stopAnimation();
-						   PLYSettings.animode.set(false);
-					   } else {
-						   vis.camAni.startAnimation();
-						   PLYSettings.animode.set(true);
-					   }
-				}
-				
-				if (ke.getCode() == KeyCode.G) {
-					checkAxes();
-				}
-			}
-		});
-	}
 	
 	public Node getNode() {
 		return createMenu();
@@ -78,13 +64,13 @@ public class PLYVISMenuBar {
        // --- Menu File
        Menu menuFile = new Menu("File");
        
-       MenuItem add = new MenuItem("Import ..."
+       MenuItem imp = new MenuItem("Import ..."
     		   //, new ImageView(new Image("menusample/new.png"))
                );
-       add.setOnAction(new EventHandler<ActionEvent>() {
+       imp.setOnAction(new EventHandler<ActionEvent>() {
            public void handle(ActionEvent t) {
         	   FileChooser fileChooser = new FileChooser();
-        	   configureFileChooser(fileChooser);
+        	   configurePLYFileChooser(fileChooser);
         	   File file = fileChooser.showOpenDialog(stage);
         	   if (file != null) {
         		   ArrayList<Point4f> pointlist;
@@ -108,6 +94,8 @@ public class PLYVISMenuBar {
         	   }
            }
        });
+       
+       imp.setAccelerator(new KeyCodeCombination(KeyCode.I));
            
        MenuItem exit = new MenuItem("Exit"
 //        		   , new ImageView(new Image("menusample/new.png"))
@@ -117,9 +105,11 @@ public class PLYVISMenuBar {
     		   System.out.println("exit");
     		   System.exit(0);
            }
-       }); 
+       });
+       
+       exit.setAccelerator(new KeyCodeCombination(KeyCode.E));
     
-       menuFile.getItems().addAll(add, exit);
+       menuFile.getItems().addAll(imp, exit);
 
        // --- Menu Edit
        Menu menuEdit = new Menu("Edit");
@@ -128,16 +118,42 @@ public class PLYVISMenuBar {
        saveScreenShot.setOnAction(new EventHandler<ActionEvent>() {
            public void handle(ActionEvent e) {
                FileChooser fileChooser = new FileChooser();
-               fileChooser.setTitle("Save Image");
-
+               configureSaveDialog(fileChooser);
                File file = fileChooser.showSaveDialog(stage);
+               ExtensionFilter format = fileChooser.getSelectedExtensionFilter();
+               
                if (file != null) {
-                   //                       ImageIO.write(SwingFXUtils.fromFXImage(pic.getImage(),
-//                           null), "png", file);
-				   System.out.println("");
+            	   WritableImage img = new WritableImage((int) visGroup.getWidth(), (int) visGroup.getHeight());
+            	   visGroup.snapshot(new SnapshotParameters(), img);
+            	   try {
+            		   String fs = format.getDescription().toLowerCase();
+            		   ImageIO.write(SwingFXUtils.fromFXImage(img, null), fs, new File(file.getAbsoluteFile() + "." + fs));
+            	   } catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+            	   }
                }
            }
+
+		private void configureSaveDialog(FileChooser fileChooser) {
+            fileChooser.setTitle("Save Image");
+		    fileChooser.setInitialDirectory(
+		        new File(PLYSettings.defaultFilePath.get())
+		    );
+		    
+		    String[] l = ImageIO.getReaderFormatNames();
+		    for (int i = 0; i < l.length; i+=2)
+		    	fileChooser.getExtensionFilters().add(
+	        		new FileChooser.ExtensionFilter(l[i].toLowerCase(), "*." + l[i].toLowerCase()));
+		    
+		    fileChooser.getExtensionFilters().add(
+	        		new FileChooser.ExtensionFilter("All files", "*.*")
+	        		);
+			
+		}
        });
+       
+       saveScreenShot.setAccelerator(new KeyCodeCombination(KeyCode.P));
 
        menuEdit.getItems().addAll(saveScreenShot);
        
@@ -153,14 +169,16 @@ public class PLYVISMenuBar {
 		   }
        }); 
        
-       MenuItem animate = new MenuItem("Start/Stop animation"
+       showcoords.setAccelerator(new KeyCodeCombination(KeyCode.G));
+       
+       MenuItem animate = new MenuItem("Start/Pause animation"
 //    		   , new ImageView(new Image("menusample/new.png"))
                );
        animate.setOnAction(new EventHandler<ActionEvent>() {
 		   public void handle(ActionEvent t) {
 			   Boolean a = PLYSettings.animode.getValue();
 			   if (a) {
-				   vis.camAni.stopAnimation();
+				   vis.camAni.pauseAnimation();
 				   PLYSettings.animode.set(false);
 			   } else {
 				   vis.camAni.startAnimation();
@@ -168,6 +186,8 @@ public class PLYVISMenuBar {
 			   }
 		   }
        });
+       
+       animate.setAccelerator(new KeyCodeCombination(KeyCode.A));
        
        Menu subMenu_VisMode = new Menu("Vismode");
        final ToggleGroup groupVismode = new ToggleGroup();
@@ -217,7 +237,7 @@ public class PLYVISMenuBar {
        return menuBar;
 	}
 	
-    private void configureFileChooser(final FileChooser fileChooser){                           
+    private void configurePLYFileChooser(final FileChooser fileChooser){                           
 	    fileChooser.setTitle("Open .ply file");
 	    fileChooser.setInitialDirectory(
 	        new File(PLYSettings.defaultFilePath.get())

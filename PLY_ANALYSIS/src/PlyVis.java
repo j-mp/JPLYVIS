@@ -148,7 +148,7 @@ public class PlyVis {
 
 	public Group createPrimitives() {
 		ArrayList<Shape3D> shapes = new ArrayList<>();
-		for (int i = 0; i < points.size(); i+=2) {
+		for (int i = 0; i < points.size(); i+=10) {
 			Point4f p = points.get(i);
 
 			Box prim = new Box(10.0, 10.0, 10.0);
