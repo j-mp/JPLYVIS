@@ -16,8 +16,6 @@
 package jply;
 
 import java.io.IOException;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 /**
  * Declaration of a list property of an element.
@@ -105,31 +103,5 @@ public class ListProperty extends Property {
     @Override
     public String toString() {
         return "property list " + countType + " " + getType() + " " + getName();
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (obj == this) {
-            return true;
-        }
-        if (obj.getClass() != getClass()) {
-            return false;
-        }
-        ListProperty rhs = (ListProperty) obj;
-        EqualsBuilder builder = new EqualsBuilder();
-        builder.appendSuper(super.equals(obj));
-        builder.append(countType, rhs.countType);
-        return builder.isEquals();
-    }
-
-    @Override
-    public int hashCode() {
-        HashCodeBuilder builder = new HashCodeBuilder();
-        builder.appendSuper(super.hashCode());
-        builder.append(countType);
-        return builder.toHashCode();
     }
 }

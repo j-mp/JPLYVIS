@@ -22,8 +22,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 /**
  * Declaration of an element type.
@@ -239,31 +237,5 @@ public final class ElementType {
     @Override
     public String toString() {
         return "element " + name + " properties=" + properties;
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (obj == this) {
-            return true;
-        }
-        if (obj.getClass() != getClass()) {
-            return false;
-        }
-        ElementType rhs = (ElementType) obj;
-        EqualsBuilder builder = new EqualsBuilder();
-        builder.append(name, rhs.name);
-        builder.append(properties, rhs.properties);
-        return builder.isEquals();
-    }
-
-    @Override
-    public int hashCode() {
-        HashCodeBuilder builder = new HashCodeBuilder();
-        builder.append(name);
-        builder.append(properties);
-        return builder.toHashCode();
     }
 }

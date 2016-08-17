@@ -1,7 +1,5 @@
 package plyvis;
 
-
-import iap.blocks.debug.FxCameraAnnimation;
 import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.PerspectiveCamera;
@@ -20,13 +18,13 @@ public class FxCameraInteractionPlyVis {
 	double anchorX, anchorY, anchorAngle;
 	double oldX, oldY;
 	
-	public FxCameraInteractionPlyVis(SubScene scene, Group group, PerspectiveCamera cam, FxCameraAnnimation camAni, int camZdist, int numberOfBins) {
+	public FxCameraInteractionPlyVis(SubScene scene, Group group, PerspectiveCamera cam, CameraAnimation camAni, int camZdist, int numberOfBins) {
 		this.camZdist = camZdist;
 		this.numberOfBins = numberOfBins;
 		addInteraction(scene, cam, camAni);
 	}
 	
-	public void addInteraction(SubScene scene, final PerspectiveCamera cam, FxCameraAnnimation camAni) {
+	public void addInteraction(SubScene scene, final PerspectiveCamera cam, CameraAnimation camAni) {
 		scene.setOnMousePressed(new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent event) {

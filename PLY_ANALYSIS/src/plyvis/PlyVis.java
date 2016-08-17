@@ -2,8 +2,6 @@ package plyvis;
 import java.util.ArrayList;
 
 import com.sun.scenario.Settings;
-
-import iap.blocks.debug.FxCameraAnnimation;
 import javafx.geometry.Bounds;
 import javafx.scene.AmbientLight;
 import javafx.scene.Group;
@@ -28,7 +26,7 @@ public class PlyVis {
 	private static final double AXIS_WIDTH = 25.0;
 	int width = 1024;
 	int height = 768;
-	public FxCameraAnnimation camAni;
+	public CameraAnimation camAni;
 	
 	private ArrayList<Point4f> points;
 
@@ -96,7 +94,7 @@ public class PlyVis {
 		Translate tz = new Translate(0.0, 0.0, camZdist);
 		cam.getTransforms().addAll(rx, ry, rz, tz);
 		
-		camAni = new FxCameraAnnimation(cam);
+		camAni = new CameraAnimation(cam);
 		camAni.startAnimation();
 		
 		Object returnscene;

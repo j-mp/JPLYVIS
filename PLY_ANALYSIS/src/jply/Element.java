@@ -18,8 +18,6 @@ package jply;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 /**
  * Element of a PLY file.
@@ -293,24 +291,6 @@ public final class Element implements Cloneable {
         return new Element(clone, type);
     }
 
-    @Override
-    public boolean equals(final Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (obj == this) {
-            return true;
-        }
-        if (obj.getClass() != getClass()) {
-            return false;
-        }
-        Element rhs = (Element) obj;
-        EqualsBuilder builder = new EqualsBuilder();
-        builder.append(type, rhs.type);
-        builder.append(data, rhs.data);
-        return builder.isEquals();
-    }
-
     /**
      * Checks if two elements are approximately equal.
      * <p>Other than {@link #equals(java.lang.Object)} this method
@@ -344,14 +324,6 @@ public final class Element implements Cloneable {
             }
         }
         return true;
-    }
-
-    @Override
-    public int hashCode() {
-        HashCodeBuilder builder = new HashCodeBuilder();
-        builder.append(type);
-        builder.append(data);
-        return builder.toHashCode();
     }
 
     @Override
