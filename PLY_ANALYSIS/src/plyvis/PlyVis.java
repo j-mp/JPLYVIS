@@ -1,3 +1,4 @@
+package plyvis;
 import java.util.ArrayList;
 
 import javax.vecmath.Point3d;
@@ -148,12 +149,19 @@ public class PlyVis {
 
 	public Group createPrimitives() {
 		ArrayList<Shape3D> shapes = new ArrayList<>();
-		for (int i = 0; i < points.size(); i+=10) {
+		for (int i = 0; i < points.size(); i+=1) {
 			Point4f p = points.get(i);
 
 			Box prim = new Box(10.0, 10.0, 10.0);
 			
-			Color col = new Color(p.intensity / 255d, p.intensity / 255d, p.intensity / 255d, 1.0);
+			double gg = 0.0;
+			
+			if ((0.5 + p.intensity / 255d) > 0.99)
+				gg =  1.0;
+				else
+					gg = (0.5 + p.intensity / 255d);
+			
+			Color col = new Color(p.intensity / 255d, gg, p.intensity / 255d, 1.0);
 			
 			PhongMaterial material = new PhongMaterial();
 			// Diffuse Color

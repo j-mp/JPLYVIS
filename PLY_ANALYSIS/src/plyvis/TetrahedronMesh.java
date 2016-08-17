@@ -1,3 +1,4 @@
+package plyvis;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
@@ -25,7 +26,6 @@ public class TetrahedronMesh extends TriangleMesh {
             int facesCounter = 0;
             int texCounter = 0;
             for (Point4f vertex : vertices) {
-            	
                 vertex.scale(100);
                 points[primitiveCounter] = (float) vertex.x;
                 points[primitiveCounter + 1] = (float) (vertex.y - (length

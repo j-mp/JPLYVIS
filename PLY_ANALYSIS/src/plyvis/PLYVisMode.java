@@ -1,3 +1,4 @@
+package plyvis;
 import javafx.beans.property.IntegerProperty;
 
 public enum PLYVisMode {

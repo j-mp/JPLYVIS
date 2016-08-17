@@ -1,3 +1,4 @@
+package plyvis;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -327,6 +328,7 @@ public class PLYVISMenuBar {
 			if (z < min_z)
 				min_z = z;
 			
+			if (z > 226f)
 			points.add(new Point4f((float) x, (float) y, (float) z, (float) intensity));
 
 		}

@@ -1,3 +1,4 @@
+package plyvis;
 import javafx.application.Application;
 import javafx.scene.Group;
 import javafx.scene.Node;
@@ -22,36 +23,13 @@ public class main extends Application{
 	
 	@Override
 	public void start(Stage primaryStage) throws Exception {
-		// Load root layout from fxml file.
-//		FXMLLoader loader = new FXMLLoader();
-//		loader.setLocation(main.class.getResource("PlyVisGui.fxml"));
-//		rootlayout = loader.load();
-		
-//		ArrayList<Point3d> pointlist = loadData("/home/pape/Schreibtisch/test.ply");
-//		PlyVis vis = new PlyVis(pointlist);
-//		
-//		visGroup = vis.createSubScene();
-//		
-//		primaryStage.setScene(vis.createScene());
-		
-//		primaryStage.setScene(createGuiScene(primaryStage));
-		
-//		ArrayList<Point3d> pointlist = loadData("/home/pape/Schreibtisch/test.ply");
-//		PlyVis vis = new PlyVis(pointlist);
-//		System.out.println("Fin loading.");
-//		   visGroup = vis.createSubScene();
-//		   VBox vbox = new VBox();
-//		   vbox.getChildren().add(visGroup);
-
-//		   bp.setBottom(visGroup);
 		primaryStage.setScene(createGuiScene(primaryStage));
-		   
-//		primaryStage.setScene(scene);
+
 		primaryStage.setTitle("PLY VIS");
 		primaryStage.show();
 	}
 
-	private Scene createGuiScene(Stage stage) {
+	public Scene createGuiScene(Stage stage) {
 		
 		new PLYSettings();
 		HBox hbox = new HBox(4.0);
