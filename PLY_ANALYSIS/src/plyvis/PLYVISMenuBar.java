@@ -1,8 +1,9 @@
 package plyvis;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
 
 import javax.imageio.ImageIO;
 
@@ -16,6 +17,7 @@ import javafx.scene.SubScene;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.RadioMenuItem;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.image.WritableImage;
@@ -26,12 +28,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
-import jply.Element;
-import jply.ElementReader;
-import jply.ElementType;
-import jply.PlyReader;
-import jply.PlyReaderFile;
-import jply.Property;
+import vtk.vtkNativeLibrary;
 
 public class PLYVISMenuBar {
 
@@ -40,11 +37,14 @@ public class PLYVISMenuBar {
 	private SubScene visGroup;
 	private BorderPane bp;
 	PlyVis vis = null;
-
+	private HashMap<String, DataSet> dataSets;
+	private String actualKeyDataset = "";
+	
 	public PLYVISMenuBar(Stage stage, SubScene visGroup, BorderPane bp) {
 		this.stage = stage;
 		this.visGroup = visGroup;
 		this.bp = bp;
+		dataSets = new HashMap<String, DataSet>();
 	}
 	
 	public Node getNode() {
@@ -66,9 +66,10 @@ public class PLYVISMenuBar {
         	   configurePLYFileChooser(fileChooser);
         	   File file = fileChooser.showOpenDialog(stage);
         	   if (file != null) {
-        		   ArrayList<Point4f> pointlist;
+
         		   try {
-        			   pointlist = loadData(file.getAbsolutePath());
+        			   DataSet dataset = new DataSet(file.getAbsolutePath());
+        			   ArrayList<Point4f> pointlist = dataset.getPointlist();
         			   // System.out.println(PLYSettings.vismode.toString());
         			   vis = new PlyVis(pointlist, (int) 1024, (int) 768);
         			   // System.out.println("Fin loading.");
@@ -79,6 +80,8 @@ public class PLYVISMenuBar {
         			   vbox.getChildren().add(visGroup);
         			   bp.setBottom(vbox);
         			   stage.setTitle("PLY Vis | " + file.getAbsolutePath());
+        			   dataSets.put(file.getName(), dataset);
+        			   actualKeyDataset = file.getName();
         		   } catch (IOException e) {
         			   // TODO Auto-generated catch block
         			   System.out.println("Could not load data.");
@@ -158,18 +161,25 @@ public class PLYVISMenuBar {
                );
        showcoords.setOnAction(new EventHandler<ActionEvent>() {
 		   public void handle(ActionEvent t) {
+			   if(visGroup == null)
+					return;
+				
 				checkAxes();
 		   }
        }); 
        
        showcoords.setAccelerator(new KeyCodeCombination(KeyCode.G));
        
-       MenuItem animate = new MenuItem("Start/Pause animation"
+       MenuItem animate = new MenuItem("Stop animation"
 //    		   , new ImageView(new Image("menusample/new.png"))
                );
        animate.setOnAction(new EventHandler<ActionEvent>() {
 		   public void handle(ActionEvent t) {
 			   Boolean a = PLYSettings.animode.getValue();
+			   
+			   if(vis == null)
+				   return;
+			   
 			   if (a) {
 				   vis.camAni.pauseAnimation();
 				   PLYSettings.animode.set(false);
@@ -225,8 +235,67 @@ public class PLYVISMenuBar {
        }
 
        menuView.getItems().addAll(showcoords, animate, subMenu_VisMode);
-
-       menuBar.getMenus().addAll(menuFile, menuEdit, menuView);
+       
+       
+       // --- Settings
+       Menu menuSettings = new Menu("Settings");
+       
+       CheckMenuItem debug = new CheckMenuItem("Debug mode");
+       debug.setOnAction(new EventHandler<ActionEvent>() {
+		   public void handle(ActionEvent t) {
+			   
+			   if (PLYSettings.debug.get()) {
+					PLYSettings.debug.set(false);
+				} else {
+					PLYSettings.debug.set(true);
+				}
+		   }
+       }); 
+       
+       //demo.setAccelerator(new KeyCodeCombination(KeyCode.D));
+       
+       menuSettings.getItems().addAll(debug);
+       
+       
+       // --- About
+       Menu menuAbout = new Menu("About");
+       
+       MenuItem demo = new MenuItem("Run VTK Demo"
+//    		   , new ImageView(new Image("menusample/new.png"))
+               );
+       demo.setOnAction(new EventHandler<ActionEvent>() {
+		   public void handle(ActionEvent t) {
+			   
+			   /* Load VTK shared librarires (.dll) on startup, print message if not found */
+			    {				
+			        if (!vtkNativeLibrary.LoadAllNativeLibraries()) 
+				{
+				       for (vtkNativeLibrary lib : vtkNativeLibrary.values()) 
+					{
+			                	if (!lib.IsLoaded()) 
+							System.out.println(lib.GetLibraryName() + " not loaded");    
+					}
+						
+					System.out.println("Make sure the search path is correct: ");
+					System.out.println(System.getProperty("java.library.path"));
+			        }
+			        vtkNativeLibrary.DisableOutputWindow(null);
+			    }
+			    
+//				DemoJavaVTK vtkdemo = new DemoJavaVTK();
+//				vtkdemo.main(new String[]{});
+			   MeshingTools ttt = new MeshingTools(dataSets.get(actualKeyDataset).pointlist);
+			   ttt.main(new String[]{});
+		   }
+       }); 
+       
+       //demo.setAccelerator(new KeyCodeCombination(KeyCode.D));
+       
+       menuAbout.getItems().addAll(demo);
+       
+       // add to bar
+       menuBar.getMenus().addAll(menuFile, menuEdit, menuView, menuSettings, menuAbout);
+       
        return menuBar;
 	}
 	
@@ -241,98 +310,6 @@ public class PLYVISMenuBar {
         		new FileChooser.ExtensionFilter("All files", "*.*")
         		);
     }
-    
-
-	private ArrayList<Point4f> loadData(String filepath) throws IOException {
-		PlyReader ply = new PlyReaderFile(filepath);
-		
-		List<String> header = ply.getRawHeaders();
-		
-		if (PLYSettings.debug.getValue()) {
-			for (String s : header) {
-				System.out.println(s);
-			}
-			
-			List<ElementType> etypes = ply.getElementTypes();
-			
-			for (ElementType et : etypes) {
-				System.out.println(et.getName());
-			}
-		}
-		ArrayList<Point4f> points = readElements(ply);
-		
-		return points;
-	}
-	
-	/**
-	 * Method for reading phenospex .ply data.
-	 * @param ply
-	 * @return
-	 * @throws IOException
-	 */
-	private static ArrayList<Point4f> readElements(PlyReader ply) throws IOException {
-		
-		ArrayList<Point4f> points = new ArrayList<>();
-		
-		ElementReader reader = ply.nextElementReader();
-		
-		// System.out.println(reader.getCount());
-		
-		ElementType type = reader.getElementType();
-		// System.out.println(type);
-		
-		List<Property> props = type.getProperties();
-		
-		double min_x = Double.MAX_VALUE, min_y = Double.MAX_VALUE, min_z = Double.MAX_VALUE, max_x = Double.MIN_VALUE, max_y = Double.MIN_VALUE, max_z = Double.MIN_VALUE;
-		
-		for (int i = 0; i < reader.getCount(); i++) {
-
-			Element ee = reader.readElement();
-
-			double x = 0, y = 0, z = 0, intensity = 0;
-			for (Property p : props) {
-				
-				if (p.getName().equals("x"))
-					x = ee.getDouble(p.getName());
-				if (p.getName().equals("y"))
-					y =  ee.getDouble(p.getName());
-				if (p.getName().equals("z"))
-					z =  ee.getDouble(p.getName());
-				if (p.getName().equals("intensity"))
-					intensity =  ee.getDouble(p.getName());
-				
-			}
-			
-			if (x > max_x)
-				max_x = x;
-			
-			if (y > max_y)
-				max_y = y;
-			
-			if (z > max_z)
-				max_z = z;
-			
-			if (x < min_x)
-				min_x = x;
-			
-			if (y < min_y)
-				min_y = y;
-			
-			if (z < min_z)
-				min_z = z;
-			
-//			if (z > 226f)
-			points.add(new Point4f((float) x, (float) y, (float) z, (float) intensity));
-
-		}
-		
-		if (PLYSettings.debug.getValue())
-			System.out.println("Inp-bounds: " + min_x + ":" + max_x + " | "  + min_y + ":" + max_y + " | "  + min_z + ":" + max_z);
-		
-		reader.close();
-
-		return points;
-	}
 
 	private void checkAxes() {
 		if (PLYSettings.showAxis.get()) {
