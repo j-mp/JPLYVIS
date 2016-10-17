@@ -1,7 +1,7 @@
 # JPLYVIS
 JavaFx based tool to visualize point cloud data.
 
-# Including:
+## Including:
 
 * loading of .ply point cloud data
 * visualization by using JavaFX
