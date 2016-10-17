@@ -6,18 +6,12 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 
-import java.awt.BorderLayout;
-import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
 import javax.swing.JButton;
 import javax.swing.JToggleButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-import de.ipk.ag_ba.commands.vfs.VirtualFileSystemFolderStorage;
 import vtk.vtkActor;
 import vtk.vtkCleanPolyData;
 import vtk.vtkDataObject;

@@ -1,5 +1,7 @@
 package plyvis;
 
+import java.awt.Color;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -20,6 +22,7 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.RadioMenuItem;
 import javafx.scene.control.ToggleGroup;
+import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
@@ -108,7 +111,7 @@ public class PLYVISMenuBar {
        menuFile.getItems().addAll(imp, exit);
 
        // --- Menu Edit
-       Menu menuEdit = new Menu("Edit");
+       Menu menuEdit = new Menu("Tools");
        
        MenuItem saveScreenShot = new MenuItem("Save Screenshot");
        saveScreenShot.setOnAction(new EventHandler<ActionEvent>() {
@@ -151,7 +154,48 @@ public class PLYVISMenuBar {
        
        saveScreenShot.setAccelerator(new KeyCodeCombination(KeyCode.P));
 
-       menuEdit.getItems().addAll(saveScreenShot);
+       MenuItem createProjection = new MenuItem("Save Z-projection");
+       createProjection.setOnAction(new EventHandler<ActionEvent>() {
+           public void handle(ActionEvent e) {
+               FileChooser fileChooser = new FileChooser();
+               configureSaveDialog(fileChooser);
+               File file = fileChooser.showSaveDialog(stage);
+               ExtensionFilter format = fileChooser.getSelectedExtensionFilter();
+               
+               if (file != null) {
+            	   BufferedImage img = createProjection(dataSets.get(actualKeyDataset), 256);
+
+            	   try {
+            		   String fs = format.getDescription().toLowerCase();
+            		   ImageIO.write(img, fs, new File(file.getAbsoluteFile() + "." + fs));
+            	   } catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+            	   }
+               }
+           }
+
+		private void configureSaveDialog(FileChooser fileChooser) {
+            fileChooser.setTitle("Save Image");
+		    fileChooser.setInitialDirectory(
+		        new File(PLYSettings.defaultFilePath.get())
+		    );
+		    
+		    String[] l = ImageIO.getReaderFormatNames();
+		    for (int i = 0; i < l.length; i+=2)
+		    	fileChooser.getExtensionFilters().add(
+	        		new FileChooser.ExtensionFilter(l[i].toLowerCase(), "*." + l[i].toLowerCase()));
+		    
+		    fileChooser.getExtensionFilters().add(
+	        		new FileChooser.ExtensionFilter("All files", "*.*")
+	        		);
+			
+		}
+       });
+       
+//       createProjection.setAccelerator(new KeyCodeCombination(KeyCode.P));
+       
+       menuEdit.getItems().addAll(saveScreenShot, createProjection);
        
        // --- Menu View
        Menu menuView = new Menu("View");
@@ -297,6 +341,61 @@ public class PLYVISMenuBar {
        menuBar.getMenus().addAll(menuFile, menuEdit, menuView, menuSettings, menuAbout);
        
        return menuBar;
+	}
+	
+	/**
+	 * Method to export an gray-image of the z-projection. Double sampled points will be averaged.
+	 * TODO Read sample-rate from ply file?? Or try to evaluate.
+	 * @param dataSet
+	 * @param size - size of the exported image, related to the scanner sampling
+	 * @return buffered image
+	 */
+	private BufferedImage createProjection(DataSet dataSet, int size) {
+		BufferedImage bf = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
+		
+		for(Point4f point : dataSet.pointlist) {
+			float x = point.x;
+			
+			if (dataSet.min_x < 0)
+				x -= dataSet.min_x;
+			else
+				x -= dataSet.min_x;
+			
+			float y = point.y;
+			
+			if (dataSet.min_y < 0)
+				y -= dataSet.min_y;
+			else
+				y -= dataSet.min_y;
+			
+			float z = point.z;
+			
+			if (dataSet.min_z < 0)
+				z -= dataSet.min_z;
+			else
+				z -= dataSet.min_z;
+			
+			//System.out.println(x + " | " + y);
+			
+			int xi = (int) (x * size / dataSet.getX_width());
+			int yi = (int) (y * size / dataSet.getY_width());
+			
+			int zi = (int) (z * 255 / dataSet.getZ_width());
+			
+			if (xi < bf. getWidth() && yi < bf.getHeight() && zi < 255) {
+				int ap = bf.getRGB(xi, yi);
+				int r = (ap & 0xff0000) >> 16;
+			
+				// merge pixel values in case of double sampling
+				if(r != 0) {
+					bf.setRGB(xi, yi, new Color((int) ((zi + r) / 2d), (int) ((zi + r) / 2d), (int) ((zi + r) / 2d)).getRGB());
+				} else
+					bf.setRGB(xi, yi, new Color(zi, zi, zi).getRGB());
+			
+			}
+		}
+		
+		return bf;
 	}
 	
     private void configurePLYFileChooser(final FileChooser fileChooser){                           

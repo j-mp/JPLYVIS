@@ -20,8 +20,19 @@ public class DataSet {
 	static double max_x = Double.MIN_VALUE;
 	static double max_y = Double.MIN_VALUE;
 	static double max_z = Double.MIN_VALUE;
-
 	
+	public double getX_width() {
+		return max_x - min_x;
+	}
+
+	public double getY_width() {
+		return max_y - min_y;
+	}
+
+	public double getZ_width() {
+		return max_z - min_z;
+	}
+
 	public DataSet(String absolutePath) throws IOException {
 		pointlist = loadData(absolutePath);
 	}
