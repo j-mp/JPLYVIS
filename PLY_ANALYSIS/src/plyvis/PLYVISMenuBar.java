@@ -24,7 +24,6 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.RadioMenuItem;
 import javafx.scene.control.ToggleGroup;
-import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
@@ -160,20 +159,25 @@ public class PLYVISMenuBar {
        MenuItem createProjection = new MenuItem("Save Z-projection");
        createProjection.setOnAction(new EventHandler<ActionEvent>() {
            public void handle(ActionEvent e) {
-               FileChooser fileChooser = new FileChooser();
+               FileChooser fileChooser = new FileChooser();  
+               boolean floatExport = false;
                configureSaveDialog(fileChooser);
                File file = fileChooser.showSaveDialog(stage);
                ExtensionFilter format = fileChooser.getSelectedExtensionFilter();
                
                if (file != null) {
-            	   BufferedImage img = Projection.createProjection(dataSets.get(actualKeyDataset), 256);
+            	   BufferedImage img = Projection.createZProjection(dataSets.get(actualKeyDataset), 256);
 
-            	   try {
-            		   String fs = format.getDescription().toLowerCase();
-            		   ImageIO.write(img, fs, new File(file.getAbsoluteFile() + "." + fs));
-            	   } catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
+            	   if (!floatExport) {
+	            	   try {
+	            		   String fs = format.getDescription().toLowerCase();
+	            		   ImageIO.write(img, fs, new File(file.getAbsoluteFile() + "." + fs));
+	            	   } catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+	            	   }
+            	   } else {
+            		   // JAI.create("filestore", img, file.getAbsoluteFile() + "." + fs, "TIFF");
             	   }
                }
            }
