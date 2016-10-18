@@ -1,6 +1,11 @@
-package plyvis;
+package datastructures;
 import java.io.Serializable;
 
+/**
+ * 
+ * @author jmp
+ *
+ */
 public class Point4f implements Serializable {
 
 	public float getX() {

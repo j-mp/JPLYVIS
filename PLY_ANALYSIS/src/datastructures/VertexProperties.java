@@ -1,4 +1,4 @@
-package plyvis;
+package datastructures;
 
 public class VertexProperties {
 

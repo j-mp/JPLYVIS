@@ -11,6 +11,11 @@ import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Translate;
 import javafx.scene.SubScene;
 
+/**
+ * 
+ * @author jmp
+ *
+ */
 public class FxCameraInteractionPlyVis {
 	
 	private int camZdist;

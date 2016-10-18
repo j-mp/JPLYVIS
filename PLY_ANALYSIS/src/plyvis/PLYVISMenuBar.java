@@ -9,6 +9,8 @@ import java.util.HashMap;
 
 import javax.imageio.ImageIO;
 
+import datastructures.Point4f;
+import datastructures.PointCloudDataSet;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -31,6 +33,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
+import tools.Projection;
 import vtk.vtkNativeLibrary;
 
 public class PLYVISMenuBar {
@@ -40,14 +43,14 @@ public class PLYVISMenuBar {
 	private SubScene visGroup;
 	private BorderPane bp;
 	PlyVis vis = null;
-	private HashMap<String, DataSet> dataSets;
+	private HashMap<String, PointCloudDataSet> dataSets;
 	private String actualKeyDataset = "";
 	
 	public PLYVISMenuBar(Stage stage, SubScene visGroup, BorderPane bp) {
 		this.stage = stage;
 		this.visGroup = visGroup;
 		this.bp = bp;
-		dataSets = new HashMap<String, DataSet>();
+		dataSets = new HashMap<String, PointCloudDataSet>();
 	}
 	
 	public Node getNode() {
@@ -71,7 +74,7 @@ public class PLYVISMenuBar {
         	   if (file != null) {
 
         		   try {
-        			   DataSet dataset = new DataSet(file.getAbsolutePath());
+        			   PointCloudDataSet dataset = new PointCloudDataSet(file.getAbsolutePath());
         			   ArrayList<Point4f> pointlist = dataset.getPointlist();
         			   // System.out.println(PLYSettings.vismode.toString());
         			   vis = new PlyVis(pointlist, (int) 1024, (int) 768);
@@ -163,7 +166,7 @@ public class PLYVISMenuBar {
                ExtensionFilter format = fileChooser.getSelectedExtensionFilter();
                
                if (file != null) {
-            	   BufferedImage img = createProjection(dataSets.get(actualKeyDataset), 256);
+            	   BufferedImage img = Projection.createProjection(dataSets.get(actualKeyDataset), 256);
 
             	   try {
             		   String fs = format.getDescription().toLowerCase();
@@ -328,7 +331,7 @@ public class PLYVISMenuBar {
 			    
 //				DemoJavaVTK vtkdemo = new DemoJavaVTK();
 //				vtkdemo.main(new String[]{});
-			   MeshingTools ttt = new MeshingTools(dataSets.get(actualKeyDataset).pointlist);
+			   MeshingTools ttt = new MeshingTools(dataSets.get(actualKeyDataset).getPointlist());
 			   ttt.main(new String[]{});
 		   }
        }); 
@@ -341,61 +344,6 @@ public class PLYVISMenuBar {
        menuBar.getMenus().addAll(menuFile, menuEdit, menuView, menuSettings, menuAbout);
        
        return menuBar;
-	}
-	
-	/**
-	 * Method to export an gray-image of the z-projection. Double sampled points will be averaged.
-	 * TODO Read sample-rate from ply file?? Or try to evaluate.
-	 * @param dataSet
-	 * @param size - size of the exported image, related to the scanner sampling
-	 * @return buffered image
-	 */
-	private BufferedImage createProjection(DataSet dataSet, int size) {
-		BufferedImage bf = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
-		
-		for(Point4f point : dataSet.pointlist) {
-			float x = point.x;
-			
-			if (dataSet.min_x < 0)
-				x -= dataSet.min_x;
-			else
-				x -= dataSet.min_x;
-			
-			float y = point.y;
-			
-			if (dataSet.min_y < 0)
-				y -= dataSet.min_y;
-			else
-				y -= dataSet.min_y;
-			
-			float z = point.z;
-			
-			if (dataSet.min_z < 0)
-				z -= dataSet.min_z;
-			else
-				z -= dataSet.min_z;
-			
-			//System.out.println(x + " | " + y);
-			
-			int xi = (int) (x * size / dataSet.getX_width());
-			int yi = (int) (y * size / dataSet.getY_width());
-			
-			int zi = (int) (z * 255 / dataSet.getZ_width());
-			
-			if (xi < bf. getWidth() && yi < bf.getHeight() && zi < 255) {
-				int ap = bf.getRGB(xi, yi);
-				int r = (ap & 0xff0000) >> 16;
-			
-				// merge pixel values in case of double sampling
-				if(r != 0) {
-					bf.setRGB(xi, yi, new Color((int) ((zi + r) / 2d), (int) ((zi + r) / 2d), (int) ((zi + r) / 2d)).getRGB());
-				} else
-					bf.setRGB(xi, yi, new Color(zi, zi, zi).getRGB());
-			
-			}
-		}
-		
-		return bf;
 	}
 	
     private void configurePLYFileChooser(final FileChooser fileChooser){                           

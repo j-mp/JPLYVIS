@@ -8,6 +8,11 @@ import javafx.scene.PerspectiveCamera;
 import javafx.scene.transform.Rotate;
 import javafx.util.Duration;
 
+/**
+ * 
+ * @author jmp
+ *
+ */
 public class CameraAnimation {
 	Timeline animation;
 	

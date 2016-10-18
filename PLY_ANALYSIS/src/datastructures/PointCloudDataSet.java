@@ -1,44 +1,34 @@
-package plyvis;
+package datastructures;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import jply.Element;
-import jply.ElementReader;
-import jply.ElementType;
-import jply.PlyReader;
-import jply.PlyReaderFile;
-import jply.Property;
+import jply_io.Element;
+import jply_io.ElementReader;
+import jply_io.ElementType;
+import jply_io.PlyReader;
+import jply_io.PlyReaderFile;
+import jply_io.Property;
+import plyvis.PLYSettings;
 
-public class DataSet {
+/**
+ * 
+ * @author jmp
+ *
+ */
+public class PointCloudDataSet {
 
 	ArrayList<Point4f> pointlist = null;
-	static double min_x = Double.MAX_VALUE;
-	static double min_y = Double.MAX_VALUE;
-	static double min_z = Double.MAX_VALUE;
+	private static double min_x = Double.MAX_VALUE;
+	private static double min_y = Double.MAX_VALUE;
+	private static double min_z = Double.MAX_VALUE;
 	static double max_x = Double.MIN_VALUE;
 	static double max_y = Double.MIN_VALUE;
 	static double max_z = Double.MIN_VALUE;
-	
-	public double getX_width() {
-		return max_x - min_x;
-	}
 
-	public double getY_width() {
-		return max_y - min_y;
-	}
-
-	public double getZ_width() {
-		return max_z - min_z;
-	}
-
-	public DataSet(String absolutePath) throws IOException {
+	public PointCloudDataSet(String absolutePath) throws IOException {
 		pointlist = loadData(absolutePath);
-	}
-	
-	public ArrayList<Point4f> getPointlist() {
-		return pointlist;
 	}
 
 	private ArrayList<Point4f> loadData(String filepath) throws IOException {
@@ -110,14 +100,14 @@ public class DataSet {
 			if (z > max_z)
 				max_z = z;
 			
-			if (x < min_x)
-				min_x = x;
+			if (x < getMin_x())
+				setMin_x(x);
 			
-			if (y < min_y)
-				min_y = y;
+			if (y < getMin_y())
+				setMin_y(y);
 			
-			if (z < min_z)
-				min_z = z;
+			if (z < getMin_z())
+				setMin_z(z);
 			
 			// if (z > 226f)
 			points.add(new Point4f((float) x, (float) y, (float) z, (float) intensity));
@@ -125,10 +115,50 @@ public class DataSet {
 		}
 		
 		if (PLYSettings.debug.getValue())
-			System.out.println("Inp-bounds: " + min_x + ":" + max_x + " | "  + min_y + ":" + max_y + " | "  + min_z + ":" + max_z);
+			System.out.println("Inp-bounds: " + getMin_x() + ":" + max_x + " | "  + getMin_y() + ":" + max_y + " | "  + getMin_z() + ":" + max_z);
 		
 		reader.close();
 
 		return points;
+	}
+
+	public static double getMin_x() {
+		return min_x;
+	}
+
+	public static void setMin_x(double min_x) {
+		PointCloudDataSet.min_x = min_x;
+	}
+
+	public static double getMin_y() {
+		return min_y;
+	}
+
+	public static void setMin_y(double min_y) {
+		PointCloudDataSet.min_y = min_y;
+	}
+
+	public static double getMin_z() {
+		return min_z;
+	}
+
+	public static void setMin_z(double min_z) {
+		PointCloudDataSet.min_z = min_z;
+	}
+	
+	public double getX_width() {
+		return max_x - getMin_x();
+	}
+
+	public double getY_width() {
+		return max_y - getMin_y();
+	}
+
+	public double getZ_width() {
+		return max_z - getMin_z();
+	}
+	
+	public ArrayList<Point4f> getPointlist() {
+		return pointlist;
 	}
 }

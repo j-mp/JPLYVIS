@@ -2,6 +2,9 @@ package plyvis;
 import java.util.ArrayList;
 
 import com.sun.scenario.Settings;
+
+import datastructures.Point4f;
+import datastructures.TetrahedronMesh;
 import javafx.geometry.Bounds;
 import javafx.scene.AmbientLight;
 import javafx.scene.Group;
@@ -146,14 +149,14 @@ public class PlyVis {
 
 			Box prim = new Box(10.0, 10.0, 10.0);
 			
-			double gg = 0.0;
+			double green_intensity = 0.0;
 			
-			if ((0.5 + p.intensity / 255d) > 0.99)
-				gg =  1.0;
+			if ((0.5 + p.getIntensity() / 255d) > 0.99)
+				green_intensity =  1.0;
 				else
-					gg = (0.5 + p.intensity / 255d);
+					green_intensity = (0.5 + p.getIntensity() / 255d);
 			
-			Color col = new Color(p.intensity / 255d, gg, p.intensity / 255d, 1.0);
+			Color col = new Color(p.getIntensity() / 255d, green_intensity, p.getIntensity() / 255d, 1.0);
 			
 			PhongMaterial material = new PhongMaterial();
 			// Diffuse Color
@@ -163,9 +166,9 @@ public class PlyVis {
 			material.setSpecularPower(39.0);
 			prim.setMaterial(material);
 
-			prim.setTranslateX(p.x * 50);
-			prim.setTranslateY(p.y * 50);
-			prim.setTranslateZ(p.z * -50);
+			prim.setTranslateX(p.getX() * 50);
+			prim.setTranslateY(p.getY() * 50);
+			prim.setTranslateZ(p.getZ() * -50);
 			
 			shapes.add(prim);
 		}

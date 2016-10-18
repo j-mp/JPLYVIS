@@ -12,6 +12,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
+import datastructures.Point4f;
 import vtk.vtkActor;
 import vtk.vtkCleanPolyData;
 import vtk.vtkDataObject;
@@ -140,7 +141,7 @@ public class MeshingTools extends JPanel {
 		for (Point4f p : data) {
 			vtkPoints vtkp = new vtkPoints();
 			// vtkp.SetDataTypeToFloat();
-			vtkp.InsertPoint(10, (double) p.x, (double) p.y, (double) p.z);
+			vtkp.InsertPoint(10, (double) p.getX(), (double) p.getY(), (double) p.getZ());
 			poly.SetPoints(vtkp);
 		}
 		
