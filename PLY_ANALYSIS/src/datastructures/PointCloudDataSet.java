@@ -66,12 +66,13 @@ public class PointCloudDataSet {
 		
 		ElementType type = reader.getElementType();
 		
+		List<Property> props = type.getProperties();
+		
 		if (PLYSettings.debug.getValue()) {
 			System.out.println(reader.getCount());
 			System.out.println(type);
+			System.out.println(props.toString());
 		}
-		
-		List<Property> props = type.getProperties();
 		
 		for (int i = 0; i < reader.getCount(); i++) {
 

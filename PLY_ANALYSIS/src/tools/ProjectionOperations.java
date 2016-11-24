@@ -16,11 +16,11 @@ import java.awt.image.WritableRaster;
 import datastructures.Point4f;
 import datastructures.PointCloudDataSet;
 
-public class Projection {
+public class ProjectionOperations {
 
 	/**
 	 * Method to export an gray-image of the z-projection. Double sampled points will be averaged.
-	 * TODO Read sample-rate from ply file?? Or try to evaluate.
+	 * TODO Read sample-rate from ply file?? Or try to evaluate. Normalize z between 0 - 255.
 	 * @param dataSet
 	 * @param size - x size (width) of the exported image, related to the scanner sampling
 	 * @return buffered image
@@ -77,12 +77,12 @@ public class Projection {
 	}
 	
 	/**
-	 * Float export
+	 * Float export for z and intensity values.
 	 * @param dataSet
 	 * @param size_x
 	 * @return
 	 */
-	public static BufferedImage createZProjectionFloat(PointCloudDataSet dataSet, int size_x) {
+	public static BufferedImage createZProjectionFloat(PointCloudDataSet dataSet, int size_x, boolean intensityExport) {
 		
 		double factor_size_x = size_x / dataSet.getX_width();
 		int size_y = (int) (dataSet.getY_width() * factor_size_x);
@@ -143,7 +143,10 @@ public class Projection {
 				if(ap[0] != 0.0) {
 					raster.setPixel(xi, yi, ap);
 				} else
-					raster.setPixel(xi, yi, new float[]{z});
+					if (!intensityExport)
+						raster.setPixel(xi, yi, new float[]{z});
+					else
+						raster.setPixel(xi, yi, new float[]{point.getIntensity()});
 			
 			}
 		}

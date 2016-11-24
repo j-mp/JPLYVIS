@@ -1,6 +1,5 @@
 package plyvis;
 
-import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -32,7 +31,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
-import tools.Projection;
+import tools.ProjectionOperations;
 import vtk.vtkNativeLibrary;
 
 public class PLYVISMenuBar {
@@ -159,14 +158,25 @@ public class PLYVISMenuBar {
        MenuItem createProjection = new MenuItem("Save Z-projection");
        createProjection.setOnAction(new EventHandler<ActionEvent>() {
            public void handle(ActionEvent e) {
-               FileChooser fileChooser = new FileChooser();  
-               boolean floatExport = false;
+               FileChooser fileChooser = new FileChooser(); 
+               
+               boolean floatExport = true;
+               boolean intensityExport = true;
+               
                configureSaveDialog(fileChooser);
                File file = fileChooser.showSaveDialog(stage);
                ExtensionFilter format = fileChooser.getSelectedExtensionFilter();
                
                if (file != null) {
-            	   BufferedImage img = Projection.createZProjection(dataSets.get(actualKeyDataset), 256);
+            	   BufferedImage img = null;
+            	   
+            	   if (floatExport)
+            		   if (intensityExport)
+            			   img = ProjectionOperations.createZProjectionFloat(dataSets.get(actualKeyDataset), 256, true);
+            		   else
+            			   img = ProjectionOperations.createZProjectionFloat(dataSets.get(actualKeyDataset), 256, false);
+            	   else
+            		   img = ProjectionOperations.createZProjection(dataSets.get(actualKeyDataset), 256);
 
             	   if (!floatExport) {
 	            	   try {
@@ -177,7 +187,9 @@ public class PLYVISMenuBar {
 						e1.printStackTrace();
 	            	   }
             	   } else {
-            		   // JAI.create("filestore", img, file.getAbsoluteFile() + "." + fs, "TIFF");
+            		    String fs = format.getDescription().toLowerCase();
+            		    // TODO include new lib?
+            		    // JAI.create("filestore", img, file.getAbsoluteFile() + "." + fs, "TIFF");
             	   }
                }
            }
